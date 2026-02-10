@@ -1,0 +1,255 @@
+# Bodhi MCP
+
+> Synthesized decision frameworks for AI agents. Enlightenment through curated knowledge.
+
+[![npm version](https://badge.fury.io/js/bodhi-mcp.svg)](https://www.npmjs.com/package/bodhi-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## What is Bodhi?
+
+Bodhi is an MCP (Model Context Protocol) server that provides **pre-synthesized knowledge** that AI agents can't derive on their own — decision frameworks requiring 2+ sources and human judgment.
+
+Unlike raw documentation, Bodhi serves **distilled wisdom**: decision guides, common mistakes, and actionable checklists synthesized from multiple authoritative sources.
+
+## Quick Start
+
+### MCP-Compatible Clients (Claude Desktop, Cursor, etc.)
+
+Add to your MCP client config (e.g., `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "bodhi": {
+      "command": "npx",
+      "args": ["bodhi-mcp"]
+    }
+  }
+}
+```
+
+Or with a custom knowledge path:
+
+```json
+{
+  "mcpServers": {
+    "bodhi": {
+      "command": "npx",
+      "args": ["bodhi-mcp", "--knowledge-path", "/path/to/your/knowledge-base"]
+    }
+  }
+}
+```
+
+### VS Code / Cursor
+
+Add to your MCP settings in VS Code or Cursor.
+
+### Local Development
+
+```bash
+# Clone and install
+git clone https://github.com/5h1vmani/bodhi-mcp.git
+cd bodhi-mcp
+npm install
+
+# Build
+npm run build
+
+# Run with your knowledge base
+npm start -- --knowledge-path /path/to/nucleus
+```
+
+## Available Tools
+
+### `route(task)`
+
+**Find the best playbook for a given task.**
+
+Uses the INDEX.md routing table to match tasks to relevant playbooks. Returns the most relevant playbook with confidence score and alternatives.
+
+```
+Input: { "task": "pitch deck design for investors" }
+Output: {
+  "playbook": "domains/marketing/pitch-deck-strategy.md",
+  "confidence": 0.85,
+  "title": "Pitch Deck Strategy",
+  "domain": "marketing",
+  "tldr": "Stage-specific structure, investor psychology...",
+  "alternatives": [...]
+}
+```
+
+### `search(query, domain?, limit?)`
+
+**Full-text search across all playbooks.**
+
+Use for broader queries when `route()` doesn't find a match, or to explore related topics.
+
+```
+Input: { "query": "UPI payment", "domain": "ux" }
+Output: [
+  { "path": "domains/ux/india-checkout-patterns.md", "title": "India Checkout Patterns", "score": 12.5, ... },
+  ...
+]
+```
+
+### `list(domain?, complexity?, limit?)`
+
+**List all available playbooks with metadata.**
+
+Use to explore what knowledge is available or filter by domain/complexity.
+
+```
+Input: { "domain": "security", "complexity": "advanced" }
+Output: [
+  { "path": "domains/security/serverless-aws-security.md", "title": "Serverless AWS Security", ... },
+  ...
+]
+```
+
+### `read(path, section?)`
+
+**Read the full content of a specific playbook.**
+
+Use after `route()` or `search()` to get the complete playbook content.
+
+```
+Input: { "path": "domains/ux/gamification.md", "section": "Decision Guide" }
+Output: "## Decision Guide\n\n| Scenario | Approach | Why |..."
+```
+
+### `summary()`
+
+**Get a summary of the knowledge base.**
+
+Returns total playbooks, domains, and complexity distribution.
+
+## Domains
+
+Bodhi organizes knowledge into domains:
+
+| Domain | Topics |
+|--------|--------|
+| **ux** | Design systems, forms, mobile, gamification, checkout UX, accessibility |
+| **marketing** | GTM strategy, pitch decks, sales, content, email, brand identity |
+| **security** | India compliance (DPDP), serverless security, CORS/CSP, OWASP |
+| **backend** | Payments, email delivery, serverless costs, B2B2C architecture |
+| **frontend** | Next.js, PDF generation, server components |
+| **devops** | IaC best practices, verification checklists |
+| **architecture** | Decision records, session handoffs |
+| **documentation** | AI-optimized docs, API documentation |
+| **ai-development** | Agent workflows, model selection, cost optimization |
+
+## Creating Your Own Knowledge Base
+
+Bodhi works with any knowledge base following the Nucleus format:
+
+```
+knowledge/
+├── INDEX.md              # Task routing table
+├── domains/
+│   ├── ux/
+│   │   ├── _index.md     # Domain index
+│   │   ├── gamification.md
+│   │   └── ...
+│   ├── marketing/
+│   │   └── ...
+│   └── ...
+└── meta/
+    └── contributing.md   # Contribution guidelines
+```
+
+### Playbook Format
+
+Each playbook follows a standard format:
+
+```markdown
+---
+domain: ux
+topic: gamification
+tags: [engagement, retention, psychology]
+complexity: intermediate
+last_updated: 2025-01-15
+---
+
+# Gamification
+
+> One-line value proposition.
+
+## TL;DR
+
+- **Key insight 1** — supporting detail
+- **Key insight 2** — supporting detail
+
+## Decision Guide
+
+| Scenario | Approach | Why |
+|----------|----------|-----|
+| Specific situation | Concrete recommendation | Reasoning |
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Real failure | Specific solution |
+
+## Checklist
+
+- [ ] Verification item 1
+- [ ] Verification item 2
+```
+
+### INDEX.md Routing Table
+
+The routing table maps tasks to playbooks:
+
+```markdown
+## Task Routing
+
+| Task | Read This |
+|------|-----------|
+| Gamification | `domains/ux/gamification.md` |
+| Pitch deck design | `domains/marketing/pitch-deck-strategy.md` |
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `BODHI_KNOWLEDGE_PATH` | Path to knowledge base | `./knowledge` |
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Run tests
+npm test
+
+# Lint
+npm run lint
+
+# Type check
+npm run typecheck
+```
+
+## License
+
+MIT
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+Built with ❤️ by **Team Bodhi** for AI agents seeking enlightenment.

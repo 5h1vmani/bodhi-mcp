@@ -1,0 +1,217 @@
+#!/bin/bash
+# pre-commit hook for nucleus
+# Auto-fixes and validates ONLY new/staged markdown files
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo -e "${YELLOW}🔍 Pre-commit: Validating staged files...${NC}"
+
+# Get only staged .md files (new or modified)
+STAGED_MD_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+
+if [ -z "$STAGED_MD_FILES" ]; then
+    echo -e "${GREEN}✅ No markdown files staged. Skipping validation.${NC}"
+    exit 0
+fi
+
+echo "Checking: $STAGED_MD_FILES"
+echo ""
+
+# Change to repo root
+cd "$(git rev-parse --show-toplevel)"
+
+# Auto-fix function for a single file
+fix_markdown_file() {
+    local filepath="$1"
+    NUCLEUS_FIX_FILE="$filepath" python3 <<'PYTHON_SCRIPT'
+import sys
+import re
+import os
+
+filepath = os.environ.get('NUCLEUS_FIX_FILE')
+if not filepath:
+    sys.exit(0)
+
+try:
+    with open(filepath, 'r', encoding='utf-8') as f:
+        content = f.read()
+except:
+    sys.exit(0)
+
+original = content
+lines = content.split('\n')
+fixed_lines = []
+in_code_block = False
+prev_was_blank = False
+prev_was_list = False
+prev_was_table = False
+
+i = 0
+while i < len(lines):
+    line = lines[i]
+    stripped = line.strip()
+
+    is_code_fence = stripped.startswith('`' + '`' + '`') or stripped.startswith('~~~')
+
+    if is_code_fence and not in_code_block:
+        in_code_block = True
+        if fixed_lines and not prev_was_blank and fixed_lines[-1].strip():
+            fixed_lines.append('')
+        fixed_lines.append(line)
+        prev_was_blank = False
+        prev_was_list = False
+        prev_was_table = False
+    elif is_code_fence and in_code_block:
+        in_code_block = False
+        fixed_lines.append(line)
+        if i + 1 < len(lines) and lines[i + 1].strip():
+            fixed_lines.append('')
+            prev_was_blank = True
+        else:
+            prev_was_blank = False
+        prev_was_list = False
+        prev_was_table = False
+    elif in_code_block:
+        fixed_lines.append(line)
+        prev_was_blank = False
+        prev_was_list = False
+        prev_was_table = False
+    else:
+        is_list = bool(re.match(r'^[\s]*[-*+][\s]', line) or re.match(r'^[\s]*\d+\.[\s]', line))
+        is_table = bool(re.match(r'^[\s]*\|', line))
+
+        if is_list and not prev_was_list and not prev_was_blank and fixed_lines and fixed_lines[-1].strip():
+            fixed_lines.append('')
+
+        if is_table and not prev_was_table and not prev_was_blank and fixed_lines and fixed_lines[-1].strip():
+            fixed_lines.append('')
+
+        fixed_lines.append(line)
+
+        if prev_was_list and not is_list and stripped and not prev_was_blank:
+            fixed_lines.insert(-1, '')
+
+        if prev_was_table and not is_table and stripped and not prev_was_blank:
+            fixed_lines.insert(-1, '')
+
+        prev_was_blank = not stripped
+        prev_was_list = is_list
+        prev_was_table = is_table
+
+    i += 1
+
+fixed_content = '\n'.join(fixed_lines)
+fixed_content = re.sub(r'\n{3,}', '\n\n', fixed_content)
+fixed_content = fixed_content.rstrip() + '\n'
+
+if fixed_content != original:
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(fixed_content)
+    print(f"Auto-fixed: {filepath}")
+PYTHON_SCRIPT
+}
+
+ERRORS=0
+FIXED=0
+
+# 1. Auto-fix spacing issues on staged files FIRST (before prettier)
+echo -e "${YELLOW}🔧 Auto-fixing spacing issues...${NC}"
+for file in $STAGED_MD_FILES; do
+    if [ -f "$file" ]; then
+        # Skip templates
+        if [[ "$file" == templates/* ]]; then
+            continue
+        fi
+        fix_markdown_file "$file"
+    fi
+done
+echo ""
+
+# 2. Run Prettier on staged files (after auto-fix so files stay formatted)
+echo -e "${YELLOW}🎨 Running Prettier...${NC}"
+if command -v npx &> /dev/null; then
+    for file in $STAGED_MD_FILES; do
+        if [ -f "$file" ]; then
+            npx prettier --write "$file" 2>/dev/null || true
+            git add "$file" 2>/dev/null || true
+        fi
+    done
+    echo -e "${GREEN}   Prettier formatting complete${NC}"
+else
+    echo -e "${YELLOW}⚠️  npx not found. Skipping Prettier.${NC}"
+fi
+echo ""
+
+# 3. Lint staged markdown files
+if command -v npx &> /dev/null; then
+    echo -e "${YELLOW}📝 Linting staged markdown files...${NC}"
+    for file in $STAGED_MD_FILES; do
+        if [ -f "$file" ]; then
+            if ! npx markdownlint-cli2 --no-globs "$file" 2>/dev/null; then
+                echo -e "${RED}❌ Lint failed: $file${NC}"
+                ERRORS=$((ERRORS + 1))
+            fi
+        fi
+    done
+else
+    echo -e "${YELLOW}⚠️  npx not found. Skipping lint.${NC}"
+fi
+echo ""
+
+# 4. Check frontmatter on domain docs
+echo -e "${YELLOW}📋 Checking frontmatter...${NC}"
+for file in $STAGED_MD_FILES; do
+    # Only check domain docs (not _index.md, not templates, not meta)
+    if [[ "$file" == domains/* ]] && [[ "$file" != *"_index.md" ]]; then
+        if [ -f "$file" ]; then
+            if ! head -1 "$file" | grep -q "^---$"; then
+                echo -e "${RED}❌ Missing frontmatter: $file${NC}"
+                ERRORS=$((ERRORS + 1))
+            fi
+        fi
+    fi
+done
+
+# 5. Check TL;DR on domain docs
+echo -e "${YELLOW}📋 Checking TL;DR sections...${NC}"
+for file in $STAGED_MD_FILES; do
+    if [[ "$file" == domains/* ]] && [[ "$file" != *"_index.md" ]]; then
+        if [ -f "$file" ]; then
+            if ! grep -q "^## TL;DR" "$file"; then
+                echo -e "${RED}❌ Missing TL;DR: $file${NC}"
+                ERRORS=$((ERRORS + 1))
+            fi
+        fi
+    fi
+done
+
+# 6. Check kebab-case naming
+echo -e "${YELLOW}📋 Checking file naming (kebab-case)...${NC}"
+for file in $STAGED_MD_FILES; do
+    filename=$(basename "$file")
+    # Skip allowed exceptions
+    if [[ "$filename" == "CLAUDE.md" ]] || [[ "$filename" == "AGENT.md" ]] || [[ "$filename" == "INDEX.md" ]] || [[ "$filename" == "_index.md" ]] || [[ "$filename" == "README.md" ]] || [[ "$filename" == "CHANGELOG.md" ]] || [[ "$filename" == "CONTRIBUTING.md" ]] || [[ "$filename" == "LICENSE.md" ]]; then
+        continue
+    fi
+    # Check kebab-case
+    if ! echo "$filename" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*\.md$'; then
+        echo -e "${RED}❌ Invalid filename (not kebab-case): $file${NC}"
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
+# Summary
+echo ""
+if [ $ERRORS -gt 0 ]; then
+    echo -e "${RED}❌ Pre-commit failed: $ERRORS error(s)${NC}"
+    echo -e "${YELLOW}Fix the issues above or use --no-verify to skip.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Pre-commit passed!${NC}"
+exit 0
