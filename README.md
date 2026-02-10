@@ -3,6 +3,7 @@
 > Synthesized decision frameworks for AI agents. Enlightenment through curated knowledge.
 
 [![npm version](https://badge.fury.io/js/bodhi-mcp.svg)](https://www.npmjs.com/package/bodhi-mcp)
+[![CI](https://github.com/5h1vmani/bodhi-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/5h1vmani/bodhi-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What is Bodhi?
@@ -125,6 +126,24 @@ Output: "## Decision Guide\n\n| Scenario | Approach | Why |..."
 
 Returns total playbooks, domains, and complexity distribution.
 
+### `diagnose()`
+
+**Health check and debugging information.**
+
+Use to troubleshoot setup issues or verify the knowledge base is loaded correctly.
+
+```
+Output: {
+  "status": "healthy",
+  "version": "0.2.0",
+  "playbooksCount": 79,
+  "routesCount": 230,
+  "domainsFound": ["ux", "marketing", "security", ...],
+  "issues": [],
+  "recommendations": []
+}
+```
+
 ## Domains
 
 Bodhi organizes knowledge into domains:
@@ -218,6 +237,7 @@ The routing table maps tasks to playbooks:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `BODHI_KNOWLEDGE_PATH` | Path to knowledge base | `./knowledge` |
+| `BODHI_LOG_LEVEL` | Logging level: `debug`, `info`, `warn`, `error`, `silent` | `info` |
 
 ## Development
 

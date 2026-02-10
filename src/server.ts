@@ -18,6 +18,12 @@ import {
   parseRoutingTable,
   createSearchIndex,
   createRouteMatcher,
+  logger,
+  setLogLevel,
+  getCache,
+  setCache,
+  isCacheValid,
+  ensureKnowledge,
 } from "./utils/index.js";
 import {
   routeTask,
@@ -25,25 +31,31 @@ import {
   listPlaybooks,
   readPlaybook,
   getKnowledgeBaseSummary,
+  diagnose,
 } from "./tools/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Create and configure the Bodhi MCP server
- */
-export async function createBodhiServer(knowledgePath?: string) {
-  // Resolve knowledge path
-  const resolvedKnowledgePath =
-    knowledgePath ??
-    process.env.BODHI_KNOWLEDGE_PATH ??
-    path.resolve(__dirname, "../knowledge");
+// Package version
+const VERSION = "0.2.0";
 
-  // Load playbooks
-  console.error(`[Bodhi] Loading playbooks from: ${resolvedKnowledgePath}`);
-  const playbooksList = loadAllPlaybooks(resolvedKnowledgePath);
-  console.error(`[Bodhi] Loaded ${playbooksList.length} playbooks`);
+/**
+ * Load and cache knowledge base data
+ */
+async function loadKnowledgeBase(knowledgePath: string) {
+  // Check cache first
+  if (isCacheValid(knowledgePath)) {
+    const cached = getCache();
+    if (cached) {
+      logger.debug("Using cached knowledge base");
+      return cached;
+    }
+  }
+
+  logger.info("Loading playbooks", { path: knowledgePath });
+  const playbooksList = loadAllPlaybooks(knowledgePath);
+  logger.info("Playbooks loaded", { count: playbooksList.length });
 
   // Create playbooks map for quick lookup
   const playbooks = new Map<string, Playbook>();
@@ -52,22 +64,74 @@ export async function createBodhiServer(knowledgePath?: string) {
   }
 
   // Load routing table
-  const indexPath = path.join(resolvedKnowledgePath, "INDEX.md");
+  const indexPath = path.join(knowledgePath, "INDEX.md");
   const routingTable = parseRoutingTable(indexPath);
-  console.error(`[Bodhi] Loaded ${routingTable.length} route entries`);
+  logger.info("Routes loaded", { count: routingTable.length });
 
   // Create search index
   const searchIndex = createSearchIndex(playbooksList);
-  console.error(`[Bodhi] Search index created`);
+  logger.debug("Search index created");
 
   // Create route matcher
   const routeMatcher = createRouteMatcher(routingTable);
+
+  // Cache the data
+  const cacheData = {
+    playbooks,
+    playbooksList,
+    routingTable,
+    searchIndex,
+    routeMatcher,
+    knowledgePath,
+    loadedAt: new Date(),
+  };
+  setCache(cacheData);
+
+  return cacheData;
+}
+
+/**
+ * Create and configure the Bodhi MCP server
+ */
+export async function createBodhiServer(knowledgePath?: string) {
+  // Set log level from environment
+  if (process.env.BODHI_LOG_LEVEL) {
+    setLogLevel(process.env.BODHI_LOG_LEVEL as "debug" | "info" | "warn" | "error" | "silent");
+  }
+
+  // Resolve knowledge path with auto-download fallback
+  let resolvedKnowledgePath: string;
+
+  if (knowledgePath) {
+    resolvedKnowledgePath = knowledgePath;
+  } else if (process.env.BODHI_KNOWLEDGE_PATH) {
+    resolvedKnowledgePath = process.env.BODHI_KNOWLEDGE_PATH;
+  } else {
+    // Check for bundled knowledge first, then auto-download
+    const bundledPath = path.resolve(__dirname, "../knowledge");
+    try {
+      resolvedKnowledgePath = await ensureKnowledge();
+    } catch (error) {
+      // Fallback to bundled if download fails
+      logger.warn("Auto-download failed, using bundled knowledge");
+      resolvedKnowledgePath = bundledPath;
+    }
+  }
+
+  // Load knowledge base (with caching)
+  const {
+    playbooks,
+    playbooksList,
+    routingTable,
+    searchIndex,
+    routeMatcher,
+  } = await loadKnowledgeBase(resolvedKnowledgePath);
 
   // Create MCP server
   const server = new Server(
     {
       name: "bodhi-mcp",
-      version: "0.1.0",
+      version: VERSION,
     },
     {
       capabilities: {
@@ -173,6 +237,15 @@ export async function createBodhiServer(knowledgePath?: string) {
             properties: {},
           },
         },
+        {
+          name: "diagnose",
+          description:
+            "Health check and debugging information. Use to troubleshoot setup issues or verify the knowledge base is loaded correctly.",
+          inputSchema: {
+            type: "object" as const,
+            properties: {},
+          },
+        },
       ],
     };
   });
@@ -181,18 +254,21 @@ export async function createBodhiServer(knowledgePath?: string) {
   server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
     const { name, arguments: args } = request.params;
 
+    logger.debug("Tool called", { name, args });
+
     try {
       switch (name) {
         case "route": {
           const task = (args as { task: string }).task;
+          if (!task || typeof task !== "string") {
+            return {
+              content: [{ type: "text" as const, text: "Error: 'task' parameter is required and must be a string" }],
+              isError: true,
+            };
+          }
           const result = routeTask(task, { routeMatcher, playbooks });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
+            content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -202,14 +278,15 @@ export async function createBodhiServer(knowledgePath?: string) {
             domain?: string;
             limit?: number;
           };
+          if (!query || typeof query !== "string") {
+            return {
+              content: [{ type: "text" as const, text: "Error: 'query' parameter is required and must be a string" }],
+              isError: true,
+            };
+          }
           const result = searchPlaybooks({ query, domain, limit }, { searchIndex });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
+            content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -221,12 +298,7 @@ export async function createBodhiServer(knowledgePath?: string) {
           };
           const result = listPlaybooks({ domain, complexity, limit }, { playbooks });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
+            content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
           };
         }
 
@@ -235,6 +307,12 @@ export async function createBodhiServer(knowledgePath?: string) {
             path: string;
             section?: string;
           };
+          if (!playbookPath || typeof playbookPath !== "string") {
+            return {
+              content: [{ type: "text" as const, text: "Error: 'path' parameter is required and must be a string" }],
+              isError: true,
+            };
+          }
           const result = readPlaybook(
             { path: playbookPath, section },
             { playbooks, knowledgePath: resolvedKnowledgePath }
@@ -255,35 +333,35 @@ export async function createBodhiServer(knowledgePath?: string) {
         case "summary": {
           const result = getKnowledgeBaseSummary({ playbooks });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: JSON.stringify(result, null, 2),
-              },
-            ],
+            content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case "diagnose": {
+          const result = diagnose({
+            playbooks,
+            knowledgePath: resolvedKnowledgePath,
+            routesCount: routingTable.length,
+            searchIndexSize: playbooksList.length,
+          });
+          return {
+            content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
           };
         }
 
         default:
+          logger.warn("Unknown tool called", { name });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: `Unknown tool: ${name}`,
-              },
-            ],
+            content: [{ type: "text" as const, text: `Unknown tool: ${name}. Available tools: route, search, list, read, summary, diagnose` }],
             isError: true,
           };
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
+      const stack = error instanceof Error ? error.stack : undefined;
+      logger.error("Tool execution failed", { name, error: message, stack });
       return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Error executing tool ${name}: ${message}`,
-          },
-        ],
+        content: [{ type: "text" as const, text: `Error executing tool ${name}: ${message}` }],
         isError: true,
       };
     }
@@ -296,10 +374,16 @@ export async function createBodhiServer(knowledgePath?: string) {
  * Start the server with stdio transport
  */
 export async function startServer(knowledgePath?: string) {
-  const server = await createBodhiServer(knowledgePath);
-  const transport = new StdioServerTransport();
+  try {
+    const server = await createBodhiServer(knowledgePath);
+    const transport = new StdioServerTransport();
 
-  console.error("[Bodhi] Starting MCP server...");
-  await server.connect(transport);
-  console.error("[Bodhi] Server connected and ready");
+    logger.info("Starting MCP server", { version: VERSION });
+    await server.connect(transport);
+    logger.info("Server connected and ready");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    logger.error("Failed to start server", { error: message });
+    process.exit(1);
+  }
 }
