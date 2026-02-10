@@ -258,6 +258,22 @@ npm run lint
 npm run typecheck
 ```
 
+### Commit Convention
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/). Commit messages are validated via commitlint.
+
+```
+<type>: <subject>
+
+# Examples:
+feat: add new search filter option
+fix: resolve routing table parsing error
+docs: update installation instructions
+chore: upgrade dependencies
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
 ## License
 
 MIT

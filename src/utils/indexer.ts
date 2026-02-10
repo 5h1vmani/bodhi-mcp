@@ -53,6 +53,11 @@ export function createSearchIndex(playbooks: Playbook[]): MiniSearch<IndexedDocu
 }
 
 /**
+ * Route matcher type
+ */
+export type RouteMatcher = ReturnType<typeof createRouteMatcher>;
+
+/**
  * Create a simple route matcher using task descriptions
  */
 export function createRouteMatcher(routes: RouteEntry[]) {

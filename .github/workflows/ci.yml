@@ -7,6 +7,7 @@ on:
     branches: [main]
 
 jobs:
+  # Phase 1-4: Build, Types, Lint, Test (from verification-checklist.md)
   test:
     runs-on: ubuntu-latest
 
@@ -27,21 +28,51 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Phase 1: Build
       - name: Build
         run: npm run build
 
-      - name: Run tests with coverage
-        run: npm run test:coverage
-
+      # Phase 2: Type check
       - name: Type check
         run: npm run typecheck
 
+      # Phase 3: Lint
       - name: Lint
         run: npm run lint
 
+      # Phase 4: Test with coverage
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+  # Phase 5: Security scan (from verification-checklist.md)
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          # Check for common secret patterns in source code
+          if grep -rE "(API_KEY|SECRET|PASSWORD|TOKEN|PRIVATE_KEY)\s*[:=]\s*['\"][^'\"]+['\"]" src/ --include="*.ts" --include="*.js" 2>/dev/null; then
+            echo "::error::Potential hardcoded secrets found!"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"
+
+      - name: Check for debug statements
+        run: |
+          # Check for debug statements that shouldn't be in production
+          # Exclude cli.ts which legitimately uses console
+          if grep -rE "console\.(log|debug|trace)\(" src/ --include="*.ts" --include="*.js" | grep -v "cli.ts" | grep -v "logger.ts" 2>/dev/null; then
+            echo "::warning::Debug statements found (review before merge)"
+          fi
+          echo "✅ Security scan complete"
+
+  # Verify package can be published
   publish-dry-run:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, security]
     if: github.event_name == 'pull_request'
 
     steps:

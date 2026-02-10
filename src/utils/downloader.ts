@@ -24,7 +24,7 @@ export interface DownloadResult {
 /**
  * Get the default knowledge path, downloading if necessary
  */
-export async function ensureKnowledge(): Promise<string> {
+export function ensureKnowledge(): string {
   // First check if bundled knowledge exists (npm package)
   const bundledPath = path.resolve(
     path.dirname(new URL(import.meta.url).pathname),
@@ -44,7 +44,7 @@ export async function ensureKnowledge(): Promise<string> {
 
   // Download knowledge base
   logger.info("Knowledge base not found, downloading...");
-  const result = await downloadKnowledge();
+  const result = downloadKnowledge();
 
   if (!result.success) {
     throw new Error(`Failed to download knowledge base: ${result.message}`);
@@ -56,7 +56,7 @@ export async function ensureKnowledge(): Promise<string> {
 /**
  * Download or update the knowledge base from GitHub
  */
-export async function downloadKnowledge(): Promise<DownloadResult> {
+export function downloadKnowledge(): DownloadResult {
   try {
     // Ensure .bodhi directory exists
     if (!fs.existsSync(BODHI_HOME)) {
@@ -161,7 +161,7 @@ export async function downloadKnowledge(): Promise<DownloadResult> {
 /**
  * Update the knowledge base
  */
-export async function updateKnowledge(): Promise<DownloadResult> {
+export function updateKnowledge(): DownloadResult {
   if (!fs.existsSync(KNOWLEDGE_DIR)) {
     return downloadKnowledge();
   }
@@ -212,8 +212,10 @@ export function getKnowledgeInfo(): {
   if (fs.existsSync(VERSION_FILE)) {
     try {
       const content = fs.readFileSync(VERSION_FILE, "utf-8");
-      const data = JSON.parse(content);
-      lastUpdated = new Date(data.updatedAt);
+      const data = JSON.parse(content) as { updatedAt?: string };
+      if (data.updatedAt) {
+        lastUpdated = new Date(data.updatedAt);
+      }
     } catch {
       // Ignore parse errors
     }

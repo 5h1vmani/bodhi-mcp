@@ -56,7 +56,7 @@ export function extractSection(content: string, heading: string): string | null 
   // Use a simpler approach: find the heading line, then extract content until next heading
   const lines = normalizedContent.split("\n");
   let inSection = false;
-  let sectionLines: string[] = [];
+  const sectionLines: string[] = [];
 
   for (const line of lines) {
     // Check if this is our target heading (## TL;DR or ## TLDR, etc.)

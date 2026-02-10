@@ -23,7 +23,8 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:run"
+    "prepublishOnly": "npm run build && npm run test:run",
+    "prepare": "husky"
   },
   "keywords": [
     "mcp",
@@ -54,11 +55,14 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.4.0",
+    "@commitlint/config-conventional": "^18.4.0",
     "@types/node": "^20.10.0",
     "@vitest/coverage-v8": "^1.0.0",
     "eslint": "^8.55.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
+    "husky": "^9.0.0",
     "prettier": "^3.1.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",

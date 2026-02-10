@@ -43,7 +43,7 @@ const VERSION = "0.2.0";
 /**
  * Load and cache knowledge base data
  */
-async function loadKnowledgeBase(knowledgePath: string) {
+function loadKnowledgeBase(knowledgePath: string) {
   // Check cache first
   if (isCacheValid(knowledgePath)) {
     const cached = getCache();
@@ -93,7 +93,7 @@ async function loadKnowledgeBase(knowledgePath: string) {
 /**
  * Create and configure the Bodhi MCP server
  */
-export async function createBodhiServer(knowledgePath?: string) {
+export function createBodhiServer(knowledgePath?: string) {
   // Set log level from environment
   if (process.env.BODHI_LOG_LEVEL) {
     setLogLevel(process.env.BODHI_LOG_LEVEL as "debug" | "info" | "warn" | "error" | "silent");
@@ -110,8 +110,8 @@ export async function createBodhiServer(knowledgePath?: string) {
     // Check for bundled knowledge first, then auto-download
     const bundledPath = path.resolve(__dirname, "../knowledge");
     try {
-      resolvedKnowledgePath = await ensureKnowledge();
-    } catch (error) {
+      resolvedKnowledgePath = ensureKnowledge();
+    } catch {
       // Fallback to bundled if download fails
       logger.warn("Auto-download failed, using bundled knowledge");
       resolvedKnowledgePath = bundledPath;
@@ -125,7 +125,7 @@ export async function createBodhiServer(knowledgePath?: string) {
     routingTable,
     searchIndex,
     routeMatcher,
-  } = await loadKnowledgeBase(resolvedKnowledgePath);
+  } = loadKnowledgeBase(resolvedKnowledgePath);
 
   // Create MCP server
   const server = new Server(
@@ -141,6 +141,7 @@ export async function createBodhiServer(knowledgePath?: string) {
   );
 
   // Register tool list handler
+  // eslint-disable-next-line @typescript-eslint/require-await
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
       tools: [
@@ -251,6 +252,7 @@ export async function createBodhiServer(knowledgePath?: string) {
   });
 
   // Register tool call handler
+  // eslint-disable-next-line @typescript-eslint/require-await
   server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest) => {
     const { name, arguments: args } = request.params;
 
@@ -375,7 +377,7 @@ export async function createBodhiServer(knowledgePath?: string) {
  */
 export async function startServer(knowledgePath?: string) {
   try {
-    const server = await createBodhiServer(knowledgePath);
+    const server = createBodhiServer(knowledgePath);
     const transport = new StdioServerTransport();
 
     logger.info("Starting MCP server", { version: VERSION });
