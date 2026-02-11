@@ -2,7 +2,7 @@
 
 > Synthesized decision frameworks for AI agents. Enlightenment through curated knowledge.
 
-[![npm version](https://badge.fury.io/js/bodhi-mcp.svg)](https://www.npmjs.com/package/bodhi-mcp)
+[![npm version](https://img.shields.io/npm/v/bodhi-mcp)](https://www.npmjs.com/package/bodhi-mcp)
 [![CI](https://github.com/5h1vmani/bodhi-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/5h1vmani/bodhi-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
