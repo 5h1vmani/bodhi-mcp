@@ -42,10 +42,6 @@ Or with a custom knowledge path:
 }
 ```
 
-### VS Code / Cursor
-
-Add to your MCP settings in VS Code or Cursor.
-
 ### Local Development
 
 ```bash
@@ -63,7 +59,9 @@ npm start -- --knowledge-path /path/to/nucleus
 
 ## Available Tools
 
-### `route(task)`
+All tools use the `bodhi_` prefix, return both markdown and structured JSON (`response_format: "json" | "markdown"`), and include `outputSchema` + `annotations`.
+
+### `bodhi_route(task)`
 
 **Find the best playbook for a given task.**
 
@@ -81,11 +79,11 @@ Output: {
 }
 ```
 
-### `search(query, domain?, limit?)`
+### `bodhi_search(query, domain?, limit?)`
 
 **Full-text search across all playbooks.**
 
-Use for broader queries when `route()` doesn't find a match, or to explore related topics.
+Use for broader queries when `bodhi_route()` doesn't find a match, or to explore related topics.
 
 ```
 Input: { "query": "UPI payment", "domain": "ux" }
@@ -95,7 +93,7 @@ Output: [
 ]
 ```
 
-### `list(domain?, complexity?, limit?)`
+### `bodhi_list(domain?, complexity?, limit?)`
 
 **List all available playbooks with metadata.**
 
@@ -109,24 +107,24 @@ Output: [
 ]
 ```
 
-### `read(path, section?)`
+### `bodhi_read(path, section?)`
 
 **Read the full content of a specific playbook.**
 
-Use after `route()` or `search()` to get the complete playbook content.
+Use after `bodhi_route()` or `bodhi_search()` to get the complete playbook content.
 
 ```
 Input: { "path": "domains/ux/gamification.md", "section": "Decision Guide" }
 Output: "## Decision Guide\n\n| Scenario | Approach | Why |..."
 ```
 
-### `summary()`
+### `bodhi_summary()`
 
 **Get a summary of the knowledge base.**
 
 Returns total playbooks, domains, and complexity distribution.
 
-### `diagnose()`
+### `bodhi_diagnose()`
 
 **Health check and debugging information.**
 
@@ -135,9 +133,9 @@ Use to troubleshoot setup issues or verify the knowledge base is loaded correctl
 ```
 Output: {
   "status": "healthy",
-  "version": "0.2.0",
-  "playbooksCount": 79,
-  "routesCount": 230,
+  "version": "0.3.0",
+  "playbooksCount": 82,
+  "routesCount": 246,
   "domainsFound": ["ux", "marketing", "security", ...],
   "issues": [],
   "recommendations": []
@@ -148,17 +146,33 @@ Output: {
 
 Bodhi organizes knowledge into domains:
 
-| Domain | Topics |
-|--------|--------|
-| **ux** | Design systems, forms, mobile, gamification, checkout UX, accessibility |
-| **marketing** | GTM strategy, pitch decks, sales, content, email, brand identity |
-| **security** | India compliance (DPDP), serverless security, CORS/CSP, OWASP |
-| **backend** | Payments, email delivery, serverless costs, B2B2C architecture |
-| **frontend** | Next.js, PDF generation, server components |
-| **devops** | IaC best practices, verification checklists |
-| **architecture** | Decision records, session handoffs |
-| **documentation** | AI-optimized docs, API documentation |
-| **ai-development** | Agent workflows, model selection, cost optimization |
+| Domain             | Topics                                                                  |
+| ------------------ | ----------------------------------------------------------------------- |
+| **ux**             | Design systems, forms, mobile, gamification, checkout UX, accessibility |
+| **marketing**      | GTM strategy, pitch decks, sales, content, email, brand identity        |
+| **security**       | India compliance (DPDP), serverless security, CORS/CSP, OWASP          |
+| **backend**        | Payments, email delivery, serverless costs, B2B2C architecture          |
+| **frontend**       | Next.js, PDF generation, server components                              |
+| **devops**         | IaC best practices, verification checklists                             |
+| **ai-development** | Agent workflows, MCP server design, model selection, cost optimization  |
+| **architecture**   | Decision records, session handoffs                                      |
+| **communication**  | Text-based rapport, psychological principles                            |
+| **documentation**  | AI-optimized docs, API documentation                                    |
+
+## MCP Spec Compliance (v0.3.0)
+
+| Feature                                            | Status |
+| -------------------------------------------------- | ------ |
+| Service-prefixed tool names (`bodhi_*`)            | ✅     |
+| `outputSchema` on all tools                        | ✅     |
+| Tool annotations (`readOnlyHint`, `idempotentHint`) | ✅     |
+| `response_format` parameter (`json` / `markdown`)  | ✅     |
+| `structuredContent` + `content` in responses       | ✅     |
+| Resources primitive (`bodhi://` URIs)              | ✅     |
+| `listChanged` capability                           | ✅     |
+| Cache with TTL + mtime invalidation               | ✅     |
+| Path traversal prevention                          | ✅     |
+| Provenance metadata (confidence, status, staleness) | ✅     |
 
 ## Creating Your Own Knowledge Base
 
@@ -190,6 +204,9 @@ topic: gamification
 tags: [engagement, retention, psychology]
 complexity: intermediate
 last_updated: 2025-01-15
+confidence: 0.85
+status: validated
+review_by: 2025-07-01
 ---
 
 # Gamification
@@ -234,10 +251,11 @@ The routing table maps tasks to playbooks:
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `BODHI_KNOWLEDGE_PATH` | Path to knowledge base | `./knowledge` |
-| `BODHI_LOG_LEVEL` | Logging level: `debug`, `info`, `warn`, `error`, `silent` | `info` |
+| Variable               | Description                                                  | Default             |
+| ---------------------- | ------------------------------------------------------------ | ------------------- |
+| `BODHI_KNOWLEDGE_PATH` | Path to knowledge base                                       | `./knowledge`       |
+| `BODHI_LOG_LEVEL`      | Logging level: `debug`, `info`, `warn`, `error`, `silent`    | `info`              |
+| `BODHI_CACHE_TTL_MS`   | Cache time-to-live in milliseconds                           | `300000` (5 min)    |
 
 ## Development
 
@@ -282,7 +300,7 @@ MIT
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
