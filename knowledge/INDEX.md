@@ -13,6 +13,15 @@
 | Multi-agent orchestration                 | `domains/ai-development/agent-workflows.md`     |
 | Model selection (Claude)                  | `domains/ai-development/agent-workflows.md`     |
 | AI cost optimization                      | `domains/ai-development/agent-workflows.md`     |
+| Building an MCP server                    | `domains/ai-development/mcp-server-design.md`   |
+| MCP tool design for AI agents             | `domains/ai-development/mcp-server-design.md`   |
+| MCP outputSchema and annotations          | `domains/ai-development/mcp-server-design.md`   |
+| MCP transport selection (stdio vs HTTP)   | `domains/ai-development/mcp-server-design.md`   |
+| MCP caching and cache invalidation        | `domains/ai-development/mcp-server-design.md`   |
+| Knowledge base MCP server patterns        | `domains/ai-development/mcp-server-design.md`   |
+| MCP evaluation suite design               | `domains/ai-development/mcp-server-design.md`   |
+| MCP provenance metadata schema            | `domains/ai-development/mcp-server-design.md`   |
+| Service prefix for MCP tool names         | `domains/ai-development/mcp-server-design.md`   |
 | Pre-commit checks                         | `domains/devops/verification-checklist.md`      |
 | IaC tool selection                        | `domains/devops/iac-best-practices.md`          |
 | CDK constructs / stacks                   | `domains/devops/iac-best-practices.md`          |
@@ -239,6 +248,10 @@
 | Exam timer anxiety                        | `domains/ux/exam-anxiety-ux.md`                 |
 | Mock test framing                         | `domains/ux/exam-anxiety-ux.md`                 |
 | Exam platform familiarization             | `domains/ux/exam-anxiety-ux.md`                 |
+| Text-based rapport / commenting           | `domains/communication/text-based-rapport.md`   |
+| LinkedIn comment psychology               | `domains/communication/text-based-rapport.md`   |
+| Franklin Effect / Pratfall Effect         | `domains/communication/text-based-rapport.md`   |
+| Making people feel heard in text          | `domains/communication/text-based-rapport.md`   |
 | New to codebase                           | `meta/observe-before-editing.md`                |
 
 ---
@@ -247,9 +260,10 @@
 
 ### AI Development (`domains/ai-development/`)
 
-| File                 | Description                                         |
-| -------------------- | --------------------------------------------------- |
-| `agent-workflows.md` | Multi-agent patterns, model selection, cost control |
+| File                   | Description                                                               |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `agent-workflows.md`   | Multi-agent patterns, model selection, cost control                       |
+| `mcp-server-design.md` | MCP server architecture, AI-first tool design, caching, provenance, evals |
 
 ### Architecture (`domains/architecture/`)
 
@@ -287,16 +301,16 @@
 
 ### Security (`domains/security/`)
 
-| File                         | Description                                         |
-| ---------------------------- | --------------------------------------------------- |
-| `serverless-aws-security.md` | Lambda/API Gateway security at 100K+ CCU, DDoS, WAF |
-| `webapp-security.md`         | OWASP 2025 Top 10, DevSecOps CI/CD integration      |
-| `server-actions-security.md` | Defense-in-depth, CVE patches, input validation     |
-| `india-dpdp.md`              | DPDP Act compliance, consent, children's data       |
-| `india-saas-legal.md`        | IT Rules, Consumer Protection, multi-tenant SaaS    |
-| `multi-tenant-cors-csp.md`  | CORS origin validation + CSP for tenant subdomains, custom domains, white-label embedding |
-| `deception-detection.md`    | Honeypots, honeytokens, wildcard DNS catch-all, cross-tenant breach detection via decoy data |
-| `moving-target-defense.md`  | Container rotation, key rotation, ephemeral infra, serverless-as-MTD, credential lifecycle |
+| File                         | Description                                                                                  |
+| ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `serverless-aws-security.md` | Lambda/API Gateway security at 100K+ CCU, DDoS, WAF                                          |
+| `webapp-security.md`         | OWASP 2025 Top 10, DevSecOps CI/CD integration                                               |
+| `server-actions-security.md` | Defense-in-depth, CVE patches, input validation                                              |
+| `india-dpdp.md`              | DPDP Act compliance, consent, children's data                                                |
+| `india-saas-legal.md`        | IT Rules, Consumer Protection, multi-tenant SaaS                                             |
+| `multi-tenant-cors-csp.md`   | CORS origin validation + CSP for tenant subdomains, custom domains, white-label embedding    |
+| `deception-detection.md`     | Honeypots, honeytokens, wildcard DNS catch-all, cross-tenant breach detection via decoy data |
+| `moving-target-defense.md`   | Container rotation, key rotation, ephemeral infra, serverless-as-MTD, credential lifecycle   |
 
 ### UX (`domains/ux/`)
 
@@ -350,6 +364,12 @@
 | `gtm-pricing-packaging.md`   | Pricing models, tier architecture, free tier decisions, value metrics, pricing psychology, usage-based mechanics |
 | `gtm-expansion.md`           | Market entry, upmarket/downmarket, international, cloud marketplace co-sell, channel partnerships, land-expand   |
 
+### Communication (`domains/communication/`)
+
+| File                    | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `text-based-rapport.md` | 7 psychological principles for making people feel heard |
+
 ### Documentation (`domains/documentation/`)
 
 | File              | Description                   |
@@ -379,4 +399,4 @@
 
 ---
 
-Last updated: 2026-02-10
+Last updated: 2026-02-11

@@ -1,10 +1,20 @@
 /**
- * read(path) tool - Read a specific playbook content
+ * bodhi_read(path) tool - Read a specific playbook content
  */
 
 import * as fs from "fs";
 import * as path from "path";
 import type { Playbook } from "../types.js";
+
+/**
+ * Validate that a resolved path stays within the allowed base directory.
+ * Prevents path traversal attacks (e.g., "../../etc/passwd").
+ */
+function isPathWithinBase(basePath: string, targetPath: string): boolean {
+  const resolvedBase = path.resolve(basePath);
+  const resolvedTarget = path.resolve(basePath, targetPath);
+  return resolvedTarget === resolvedBase || resolvedTarget.startsWith(resolvedBase + path.sep);
+}
 
 export interface ReadToolDeps {
   playbooks: Map<string, Playbook>;
@@ -60,8 +70,13 @@ export function readPlaybook(
   }
 
   if (!playbook) {
+    // Validate path stays within knowledge base (prevent traversal)
+    if (!isPathWithinBase(knowledgePath, requestedPath)) {
+      return { error: "Invalid path: access outside knowledge base is not allowed." };
+    }
+
     // Try direct file read as fallback
-    const fullPath = path.join(knowledgePath, requestedPath);
+    const fullPath = path.resolve(knowledgePath, requestedPath);
     if (fs.existsSync(fullPath)) {
       try {
         const content = fs.readFileSync(fullPath, "utf-8");
@@ -82,7 +97,7 @@ export function readPlaybook(
     }
 
     return {
-      error: `Playbook not found: ${requestedPath}. Use list() to see available playbooks.`,
+      error: `Playbook not found: ${requestedPath}. Use bodhi_list() to see available playbooks.`,
     };
   }
 

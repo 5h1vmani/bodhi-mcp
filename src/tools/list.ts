@@ -1,5 +1,5 @@
 /**
- * list(domain?) tool - List available playbooks with metadata
+ * bodhi_list(domain?) tool - List available playbooks with metadata
  */
 
 import type { Playbook, ListResult } from "../types.js";
@@ -51,14 +51,23 @@ export function listPlaybooks(
     results = results.slice(0, limit);
 
     // Transform to ListResult format
-    return results.map((p) => ({
-      path: p.relativePath,
-      title: p.title,
-      domain: p.frontmatter.domain,
-      complexity: p.frontmatter.complexity,
-      tags: p.frontmatter.tags,
-      lastUpdated: p.frontmatter.last_updated,
-    }));
+    const now = new Date();
+    return results.map((p) => {
+      const isStale = p.frontmatter.review_by
+        ? new Date(p.frontmatter.review_by) < now
+        : false;
+      return {
+        path: p.relativePath,
+        title: p.title,
+        domain: p.frontmatter.domain,
+        complexity: p.frontmatter.complexity,
+        tags: p.frontmatter.tags,
+        lastUpdated: p.frontmatter.last_updated,
+        confidence: p.frontmatter.confidence,
+        status: p.frontmatter.status,
+        stale: isStale || undefined,
+      };
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return { error: `Failed to list playbooks: ${message}` };

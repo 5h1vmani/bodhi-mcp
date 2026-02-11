@@ -97,6 +97,14 @@ related:
   - path/to/related.md
 deprecated: true # Only if deprecated
 superseded_by: new-doc.md # If replaced
+# Provenance fields — recommended for high-stakes domains
+confidence: 0.9 # 0.0-1.0, synthesis confidence
+source_refs: # What was synthesized from
+  - "Source name or URL"
+status: validated # draft | validated | superseded | archived
+review_by: 2026-06-01 # Staleness deadline
+author: "Claude + Human" # Who produced the synthesis
+version: 2 # Bump on significant updates
 ```
 
 ## Length Guidelines

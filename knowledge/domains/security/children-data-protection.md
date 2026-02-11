@@ -20,34 +20,35 @@ last_updated: 2026-02-10
 
 ## Decision Guide
 
-| Scenario | Approach | Why |
-| --- | --- | --- |
-| Exam platform serving India | Age gate at registration; parental consent for <18 | DPDP Act: under-18 is a child (strictest globally) |
-| Exam platform serving US only | Parental consent for <13; COPPA compliance deadline April 2026 | COPPA updated rules; separate advertising consent required |
-| Exam platform serving EU | Parental consent for <16 (or <13 based on member state) | GDPR Article 8; member states vary (13-16) |
-| Multi-jurisdiction platform (India + US + EU) | Use strictest rule: parental consent for <18 (India DPDP) | Single flow simplifies compliance; covers all jurisdictions |
-| Collecting device IDs, IP addresses | Treat as PII requiring parental consent | COPPA 2025 expanded definition includes persistent identifiers |
-| Behavioral tracking / analytics | Obtain separate opt-in consent; disable by default for minors | COPPA: separate consent for non-integral uses; DPDP: no legitimate interest for children |
-| Targeted advertising to students | Prohibited without explicit parental opt-in | COPPA + state laws (NY Child Data Protection Act); high-risk, low-reward |
-| Email marketing to students | Requires parental consent; double opt-in recommended | CAN-SPAM + COPPA; accidental COPPA violation common |
-| Exam results storage | Retain only as long as necessary; provide deletion mechanism | COPPA data retention; DPDP "purpose limitation" |
-| Payment info for minor account | Parental payment method only; never store minor's card | PCI-DSS + COPPA; legal capacity to contract |
-| Parental consent verification | Email + confirmation code OR credit card verification | COPPA "reasonable efforts" standard; avoid overly burdensome |
-| Consent withdrawal | Easy, one-click process; delete data within 30 days | COPPA + GDPR + DPDP rights; difficult withdrawal = violation |
-| Free vs paid exam pricing | Same consent requirements; "free" doesn't exempt from COPPA | Common misconception; consent based on age, not pricing |
-| Third-party integrations (analytics, CDN) | Data Processing Agreement (DPA) + COPPA compliance clause | You're liable for third-party violations; due diligence required |
+| Scenario                                      | Approach                                                       | Why                                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Exam platform serving India                   | Age gate at registration; parental consent for <18             | DPDP Act: under-18 is a child (strictest globally)                                       |
+| Exam platform serving US only                 | Parental consent for <13; COPPA compliance deadline April 2026 | COPPA updated rules; separate advertising consent required                               |
+| Exam platform serving EU                      | Parental consent for <16 (or <13 based on member state)        | GDPR Article 8; member states vary (13-16)                                               |
+| Multi-jurisdiction platform (India + US + EU) | Use strictest rule: parental consent for <18 (India DPDP)      | Single flow simplifies compliance; covers all jurisdictions                              |
+| Collecting device IDs, IP addresses           | Treat as PII requiring parental consent                        | COPPA 2025 expanded definition includes persistent identifiers                           |
+| Behavioral tracking / analytics               | Obtain separate opt-in consent; disable by default for minors  | COPPA: separate consent for non-integral uses; DPDP: no legitimate interest for children |
+| Targeted advertising to students              | Prohibited without explicit parental opt-in                    | COPPA + state laws (NY Child Data Protection Act); high-risk, low-reward                 |
+| Email marketing to students                   | Requires parental consent; double opt-in recommended           | CAN-SPAM + COPPA; accidental COPPA violation common                                      |
+| Exam results storage                          | Retain only as long as necessary; provide deletion mechanism   | COPPA data retention; DPDP "purpose limitation"                                          |
+| Payment info for minor account                | Parental payment method only; never store minor's card         | PCI-DSS + COPPA; legal capacity to contract                                              |
+| Parental consent verification                 | Email + confirmation code OR credit card verification          | COPPA "reasonable efforts" standard; avoid overly burdensome                             |
+| Consent withdrawal                            | Easy, one-click process; delete data within 30 days            | COPPA + GDPR + DPDP rights; difficult withdrawal = violation                             |
+| Free vs paid exam pricing                     | Same consent requirements; "free" doesn't exempt from COPPA    | Common misconception; consent based on age, not pricing                                  |
+| Third-party integrations (analytics, CDN)     | Data Processing Agreement (DPA) + COPPA compliance clause      | You're liable for third-party violations; due diligence required                         |
 
 ## Multi-Jurisdiction Age Requirements
 
-| Jurisdiction | Age Threshold | Definition | Parental Consent Required |
-| --- | --- | --- | --- |
-| **India (DPDP Act)** | Under 18 | "Child" | Yes (strictest globally) |
-| **US (COPPA)** | Under 13 | "Child" | Yes |
-| **EU (GDPR Article 8)** | Under 16 (or 13-16 by member state) | "Child" for information society services | Yes (can be lowered to 13 by member states) |
-| **California (CCPA)** | Under 16 | "Minor" | Yes (under 13: parental; 13-16: child or parent can consent) |
-| **New York (Child Data Protection Act)** | Under 18 | "Minor" | Restrictions on advertising, addictive features |
+| Jurisdiction                             | Age Threshold                       | Definition                               | Parental Consent Required                                    |
+| ---------------------------------------- | ----------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
+| **India (DPDP Act)**                     | Under 18                            | "Child"                                  | Yes (strictest globally)                                     |
+| **US (COPPA)**                           | Under 13                            | "Child"                                  | Yes                                                          |
+| **EU (GDPR Article 8)**                  | Under 16 (or 13-16 by member state) | "Child" for information society services | Yes (can be lowered to 13 by member states)                  |
+| **California (CCPA)**                    | Under 16                            | "Minor"                                  | Yes (under 13: parental; 13-16: child or parent can consent) |
+| **New York (Child Data Protection Act)** | Under 18                            | "Minor"                                  | Restrictions on advertising, addictive features              |
 
 **Platform decision:**
+
 - If serving India: use <18 threshold (covers all jurisdictions)
 - If US/EU only: use <13 (COPPA) or <16 (GDPR) based on primary market
 - If multi-jurisdiction: <18 is safest (single flow, maximum compliance)
@@ -59,13 +60,16 @@ last_updated: 2026-02-10
 ### 1. Separate Consent Requirements
 
 **Before (COPPA 2013):**
+
 - Single blanket consent for all data collection
 
 **After (COPPA 2025):**
+
 - **Primary function consent** (e.g., account creation, exam access)
 - **Separate opt-in for third-party disclosures** (advertising, analytics, non-integral uses)
 
 **Implementation:**
+
 ```typescript
 // ✅ COPPA 2025 compliant consent flow
 const consentForm = {
@@ -83,7 +87,7 @@ const consentForm = {
     label: "Receive email updates about new exams",
     required: false,
     preChecked: false, // Separate from essential
-  }
+  },
 };
 
 // ❌ COPPA violation: bundled consent
@@ -91,13 +95,14 @@ const consentForm = {
   allConsent: {
     label: "I agree to all data uses",
     required: true, // Bundling is prohibited
-  }
+  },
 };
 ```
 
 ### 2. Expanded Personal Information Definition
 
 **Now includes:**
+
 - Persistent identifiers (device IDs, cookie IDs, IP addresses)
 - Biometric data (fingerprints, voiceprints, facial recognition)
 - Geolocation data (precise location)
@@ -105,6 +110,7 @@ const consentForm = {
 - Inferred data (profiling, predictive analytics)
 
 **Audit your data collection:**
+
 ```typescript
 // ❌ PII under COPPA 2025 (requires parental consent)
 const userData = {
@@ -126,11 +132,13 @@ const userData = {
 ### 3. Data Retention and Deletion
 
 **Requirements:**
+
 - Delete data once no longer necessary for stated purpose
 - Provide clear data retention policy
 - Honor parental deletion requests within reasonable time (30 days recommended)
 
 **Implementation:**
+
 ```sql
 -- Automated data purging after exam completion + retention period
 DELETE FROM exam_sessions
@@ -148,15 +156,16 @@ DELETE FROM analytics_events WHERE user_id = $1;
 
 **Key differences from COPPA:**
 
-| Aspect | COPPA (US) | GDPR Article 8 (EU) |
-| --- | --- | --- |
-| Age threshold | Under 13 | Under 16 (can be lowered to 13 by member states) |
-| Consent model | Parental consent | Parental consent OR child consent if member state allows |
-| Scope | Online services directed at children | Information society services processing children's data |
-| Rights | Parental access, deletion | Right to erasure, access, rectification, data portability |
-| Penalties | $51,744 per child per violation | Up to €20M or 4% global revenue |
+| Aspect        | COPPA (US)                           | GDPR Article 8 (EU)                                       |
+| ------------- | ------------------------------------ | --------------------------------------------------------- |
+| Age threshold | Under 13                             | Under 16 (can be lowered to 13 by member states)          |
+| Consent model | Parental consent                     | Parental consent OR child consent if member state allows  |
+| Scope         | Online services directed at children | Information society services processing children's data   |
+| Rights        | Parental access, deletion            | Right to erasure, access, rectification, data portability |
+| Penalties     | $51,744 per child per violation      | Up to €20M or 4% global revenue                           |
 
 **Educational platforms must:**
+
 - Verify age using reasonable methods
 - Obtain parental consent for <16 (or lower member state threshold)
 - Provide easy consent withdrawal
@@ -167,27 +176,33 @@ DELETE FROM analytics_events WHERE user_id = $1;
 **Strictest global requirements:**
 
 ### Age Definition
+
 - **Child = under 18** (higher than GDPR/COPPA)
 - Applies to ALL data processing, not just targeted services
 
 ### Consent Model
+
 - Parental/guardian consent MANDATORY
 - No "legitimate interest" exception for children
 - Opt-in only (no pre-checked boxes)
 
 ### Specific Prohibitions
+
 - Tracking or behavioral monitoring of children
 - Targeted advertising to children
 - Any processing that could cause harm to child
 
 ### Breach Notification
+
 - ALL breaches must be reported (no materiality threshold)
 - 72-hour detailed report to Data Protection Board
 
 ### Penalties
+
 - Up to ₹250 crore (~$30 million) per violation
 
 **Platform obligations:**
+
 ```typescript
 // Age verification for India
 const registrationFlow = async (userInput) => {
@@ -213,13 +228,13 @@ const registrationFlow = async (userInput) => {
 
 **COPPA "reasonable efforts" standard:**
 
-| Method | Verification Strength | User Friction | Cost |
-| --- | --- | --- | --- |
-| Email + confirmation link | Low | Low | Free |
-| Email + follow-up call | Medium | Medium | Moderate (staff time) |
-| Credit card verification (no charge) | High | Medium | Payment processor fees |
-| Government ID upload | High | High | ID verification service costs |
-| Video call verification | High | High | Staff time + scheduling |
+| Method                               | Verification Strength | User Friction | Cost                          |
+| ------------------------------------ | --------------------- | ------------- | ----------------------------- |
+| Email + confirmation link            | Low                   | Low           | Free                          |
+| Email + follow-up call               | Medium                | Medium        | Moderate (staff time)         |
+| Credit card verification (no charge) | High                  | Medium        | Payment processor fees        |
+| Government ID upload                 | High                  | High          | ID verification service costs |
+| Video call verification              | High                  | High          | Staff time + scheduling       |
 
 **Recommended approach for exam platforms:**
 
@@ -233,9 +248,9 @@ const basicConsent = {
     "Child enters parent email",
     "Parent receives consent request",
     "Parent clicks confirmation link",
-    "Account activated"
+    "Account activated",
   ],
-  suitable: "Basic exam access, no PII beyond name/email"
+  suitable: "Basic exam access, no PII beyond name/email",
 };
 
 // Tier 2: Enhanced verification (payment, sensitive data)
@@ -244,9 +259,9 @@ const enhancedConsent = {
   steps: [
     "Email verification (above)",
     "PLUS: credit card match OR ID upload",
-    "Account activated with full features"
+    "Account activated with full features",
   ],
-  suitable: "Payment processing, detailed analytics, third-party integrations"
+  suitable: "Payment processing, detailed analytics, third-party integrations",
 };
 ```
 
@@ -254,20 +269,21 @@ const enhancedConsent = {
 
 **Principle:** Don't collect what you don't need
 
-| Data Type | Essential? | COPPA/GDPR/DPDP Requirement |
-| --- | --- | --- |
-| Name | Yes (for account) | Essential function: allowed |
-| Email | Yes (for login/results) | Essential function: allowed |
-| Date of birth | Yes (for age verification) | Essential function: allowed |
-| Parent email (if minor) | Yes (for consent) | Required by COPPA/GDPR/DPDP |
-| Phone number | No (unless SMS login) | Requires separate consent |
-| Device ID | No (analytics only) | Requires parental consent (COPPA 2025) |
-| IP address | No (unless fraud prevention) | PII under COPPA 2025; requires consent |
-| Geolocation | No (unless exam proctoring) | Requires separate opt-in |
-| Behavioral tracking | No (analytics) | Prohibited for minors (DPDP); requires opt-in (COPPA) |
-| Biometric data | No (unless proctoring) | High-risk; avoid if possible; requires consent |
+| Data Type               | Essential?                   | COPPA/GDPR/DPDP Requirement                           |
+| ----------------------- | ---------------------------- | ----------------------------------------------------- |
+| Name                    | Yes (for account)            | Essential function: allowed                           |
+| Email                   | Yes (for login/results)      | Essential function: allowed                           |
+| Date of birth           | Yes (for age verification)   | Essential function: allowed                           |
+| Parent email (if minor) | Yes (for consent)            | Required by COPPA/GDPR/DPDP                           |
+| Phone number            | No (unless SMS login)        | Requires separate consent                             |
+| Device ID               | No (analytics only)          | Requires parental consent (COPPA 2025)                |
+| IP address              | No (unless fraud prevention) | PII under COPPA 2025; requires consent                |
+| Geolocation             | No (unless exam proctoring)  | Requires separate opt-in                              |
+| Behavioral tracking     | No (analytics)               | Prohibited for minors (DPDP); requires opt-in (COPPA) |
+| Biometric data          | No (unless proctoring)       | High-risk; avoid if possible; requires consent        |
 
 **Default to NO collection:**
+
 ```typescript
 // ✅ Minimal data collection for exam platform
 const essentialData = {
@@ -291,22 +307,22 @@ const excessiveData = {
 
 ## Common Mistakes
 
-| Mistake | Fix |
-| --- | --- |
-| Treating "free" services as exempt from COPPA | COPPA applies regardless of pricing; consent based on age, not payment |
-| Single bundled consent for all data uses | Separate consent for advertising/third-party disclosures (COPPA 2025) |
-| Not treating device IDs / IP addresses as PII | COPPA 2025 expanded definition; requires parental consent |
-| Using "legitimate interest" for children's data | Not allowed under DPDP (India); weak basis under GDPR for minors |
-| Pre-checked consent boxes | Must be opt-in (user action required); pre-checked = invalid consent |
-| No age verification at registration | Age gate required; asking date of birth is minimum |
-| Retaining data indefinitely | Data retention limits required; delete after purpose fulfilled |
-| Difficult consent withdrawal process | Must be as easy as granting consent; one-click withdrawal |
-| Third-party integrations without DPA | You're liable for vendor COPPA violations; due diligence required |
-| No parental access to child's data | COPPA/GDPR right: parents can view, correct, delete child's data |
-| Behavioral tracking / analytics for minors | Prohibited under DPDP; requires separate consent under COPPA 2025 |
-| Targeted advertising to students | High-risk; requires explicit opt-in; many state laws prohibit |
-| Using India <13 threshold instead of <18 | DPDP Act: child = under 18 (strictest globally) |
-| No breach notification plan | COPPA: report to FTC; DPDP: 72-hour report; GDPR: 72-hour report |
+| Mistake                                         | Fix                                                                    |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| Treating "free" services as exempt from COPPA   | COPPA applies regardless of pricing; consent based on age, not payment |
+| Single bundled consent for all data uses        | Separate consent for advertising/third-party disclosures (COPPA 2025)  |
+| Not treating device IDs / IP addresses as PII   | COPPA 2025 expanded definition; requires parental consent              |
+| Using "legitimate interest" for children's data | Not allowed under DPDP (India); weak basis under GDPR for minors       |
+| Pre-checked consent boxes                       | Must be opt-in (user action required); pre-checked = invalid consent   |
+| No age verification at registration             | Age gate required; asking date of birth is minimum                     |
+| Retaining data indefinitely                     | Data retention limits required; delete after purpose fulfilled         |
+| Difficult consent withdrawal process            | Must be as easy as granting consent; one-click withdrawal              |
+| Third-party integrations without DPA            | You're liable for vendor COPPA violations; due diligence required      |
+| No parental access to child's data              | COPPA/GDPR right: parents can view, correct, delete child's data       |
+| Behavioral tracking / analytics for minors      | Prohibited under DPDP; requires separate consent under COPPA 2025      |
+| Targeted advertising to students                | High-risk; requires explicit opt-in; many state laws prohibit          |
+| Using India <13 threshold instead of <18        | DPDP Act: child = under 18 (strictest globally)                        |
+| No breach notification plan                     | COPPA: report to FTC; DPDP: 72-hour report; GDPR: 72-hour report       |
 
 ## Checklist
 
@@ -332,6 +348,7 @@ const excessiveData = {
 ## Platform-Specific Implementation (Exam Platforms)
 
 ### Registration Flow
+
 ```typescript
 const handleRegistration = async (input) => {
   // 1. Calculate age
@@ -339,11 +356,10 @@ const handleRegistration = async (input) => {
   const jurisdiction = detectJurisdiction(input.country);
 
   // 2. Determine consent requirements
-  const requiresConsent = (
-    (jurisdiction === 'US' && age < 13) ||
-    (jurisdiction === 'EU' && age < 16) ||
-    (jurisdiction === 'IN' && age < 18)
-  );
+  const requiresConsent =
+    (jurisdiction === "US" && age < 13) ||
+    (jurisdiction === "EU" && age < 16) ||
+    (jurisdiction === "IN" && age < 18);
 
   if (requiresConsent) {
     // 3. Request parental consent
@@ -355,14 +371,14 @@ const handleRegistration = async (input) => {
         optional: {
           analytics: false, // Disabled for minors
           marketing: false, // Requires separate opt-in
-        }
-      }
+        },
+      },
     });
 
     // 4. Pending approval state
     return {
-      status: 'pending_parental_consent',
-      message: 'Consent request sent to parent/guardian'
+      status: "pending_parental_consent",
+      message: "Consent request sent to parent/guardian",
     };
   }
 
@@ -372,6 +388,7 @@ const handleRegistration = async (input) => {
 ```
 
 ### Data Retention
+
 ```sql
 -- Retention policy: exam results kept for 1 year after completion
 CREATE TABLE data_retention_policies (
@@ -392,22 +409,23 @@ WHERE user_age < 18
 ```
 
 ### Parental Dashboard
+
 ```typescript
 // Parent can view/delete child's data
 const parentDashboard = {
   endpoints: {
-    viewChildData: '/api/parent/child-data',
-    deleteChildData: '/api/parent/delete-child',
-    withdrawConsent: '/api/parent/withdraw-consent',
-    exportData: '/api/parent/export-data', // GDPR data portability
+    viewChildData: "/api/parent/child-data",
+    deleteChildData: "/api/parent/delete-child",
+    withdrawConsent: "/api/parent/withdraw-consent",
+    exportData: "/api/parent/export-data", // GDPR data portability
   },
   features: [
     "View all exams taken",
     "View exam results",
     "Download data (GDPR export)",
     "Delete account and all data",
-    "Modify consent preferences"
-  ]
+    "Modify consent preferences",
+  ],
 };
 ```
 
@@ -430,6 +448,6 @@ const parentDashboard = {
 
 ## Changelog
 
-| Date | Change |
-| --- | --- |
+| Date       | Change          |
+| ---------- | --------------- |
 | 2026-02-10 | Initial version |

@@ -17,6 +17,11 @@ export interface IndexedDocument {
   tldr: string;
   description: string;
   content: string;
+  // Provenance fields
+  confidence?: number;
+  status?: string;
+  lastUpdated?: string;
+  stale?: boolean;
 }
 
 /**
@@ -25,7 +30,7 @@ export interface IndexedDocument {
 export function createSearchIndex(playbooks: Playbook[]): MiniSearch<IndexedDocument> {
   const index = new MiniSearch<IndexedDocument>({
     fields: ["title", "tldr", "tags", "description", "content", "topic"],
-    storeFields: ["path", "relativePath", "title", "domain", "complexity", "tldr", "tags"],
+    storeFields: ["path", "relativePath", "title", "domain", "complexity", "tldr", "tags", "confidence", "status", "lastUpdated", "stale"],
     searchOptions: {
       boost: { title: 4, tldr: 3, tags: 2, description: 2, topic: 2 },
       fuzzy: 0.2,
@@ -33,19 +38,29 @@ export function createSearchIndex(playbooks: Playbook[]): MiniSearch<IndexedDocu
     },
   });
 
-  const documents: IndexedDocument[] = playbooks.map((playbook) => ({
-    id: playbook.relativePath,
-    path: playbook.path,
-    relativePath: playbook.relativePath,
-    title: playbook.title,
-    domain: playbook.frontmatter.domain,
-    topic: playbook.frontmatter.topic,
-    tags: playbook.frontmatter.tags.join(" "),
-    complexity: playbook.frontmatter.complexity,
-    tldr: playbook.tldr,
-    description: playbook.description,
-    content: playbook.content.slice(0, 5000), // Limit content for indexing
-  }));
+  const now = new Date();
+  const documents: IndexedDocument[] = playbooks.map((playbook) => {
+    const isStale = playbook.frontmatter.review_by
+      ? new Date(playbook.frontmatter.review_by) < now
+      : false;
+    return {
+      id: playbook.relativePath,
+      path: playbook.path,
+      relativePath: playbook.relativePath,
+      title: playbook.title,
+      domain: playbook.frontmatter.domain,
+      topic: playbook.frontmatter.topic,
+      tags: playbook.frontmatter.tags.join(" "),
+      complexity: playbook.frontmatter.complexity,
+      tldr: playbook.tldr,
+      description: playbook.description,
+      content: playbook.content.slice(0, 5000),
+      confidence: playbook.frontmatter.confidence,
+      status: playbook.frontmatter.status,
+      lastUpdated: playbook.frontmatter.last_updated,
+      stale: isStale || undefined,
+    };
+  });
 
   index.addAll(documents);
 

@@ -271,6 +271,13 @@ topic: [required]
 tags: [3-4 max, no redundant terms]
 complexity: [beginner|intermediate|advanced]
 last_updated: [YYYY-MM-DD]
+# Optional provenance fields — add to new playbooks, backfill gradually
+confidence: [0.0-1.0] # How confident is this synthesis
+source_refs: [] # What was synthesized from (DOIs, URLs, report names)
+status: [draft|validated|superseded|archived]
+review_by: [YYYY-MM-DD] # Staleness deadline — flagged in search when past
+author: [who-produced-this] # Human, AI model, or both
+version: [integer] # Bump on significant updates
 ---
 
 # Title
@@ -372,21 +379,25 @@ last_updated: [YYYY-MM-DD]
 
 1. Read fully first
 2. Make focused changes
-3. Update `last_updated`
+3. Update `last_updated` and bump `version` (if present)
 4. Add changelog entry for substantive changes
+5. If confidence has changed (new sources, corrections), update `confidence`
 
 ## Deprecating Content
 
 ```markdown
-> **DEPRECATED:** Superseded by [New Doc](path.md).
+> **DEPRECATED (YYYY-MM-DD):** Superseded by [New Doc](path.md).
 
 ---
 
-deprecated: true
+status: superseded
 superseded_by: path/to/new.md
+deprecated: true
 
 ---
 ```
+
+Superseded playbooks are excluded from default search but remain accessible by path.
 
 ## No Placeholders Policy
 

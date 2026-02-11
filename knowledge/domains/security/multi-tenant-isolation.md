@@ -20,38 +20,41 @@ last_updated: 2026-02-10
 
 ## Decision Guide
 
-| Scenario | Approach | Why |
-| --- | --- | --- |
-| Building new multi-tenant SaaS | Pool model with RLS + tenant_id in all queries | Most cost-efficient at scale; RLS provides safety net |
-| High-compliance tenant (HIPAA, finance) | Silo model (dedicated DB/infra per tenant) | Regulatory requirements often mandate physical isolation |
-| Scaling from single to multi-tenant | Bridge model (new tenants pooled, legacy siloed) | Gradual migration; don't force big-bang refactor |
-| Caching tenant data (Redis, CDN) | Prefix all keys with `tenant_{id}:` pattern | Prevents cache poisoning across tenants |
-| Resolving tenant context | Derive from subdomain (`tenant.app.com`) or JWT claim | Never from request header/body; client can forge |
-| Sequential resource IDs | Use UUIDs for all tenant-scoped resources | Sequential IDs enable enumeration attacks |
-| Shared application cache | Separate cache instance per tenant OR namespaced keys | Cache invalidation bugs become cross-tenant attacks |
-| Rate limiting API endpoints | Per-tenant quotas, not global | Prevents noisy neighbor; ensures fairness |
-| Multi-tenant analytics dashboard | Tenant filter enforced at database view layer | Application logic alone is insufficient |
-| Free tier + paid tier tenants | Pool free (strict quotas), silo paid (dedicated) | Cost optimization while meeting SLA needs |
+| Scenario                                | Approach                                              | Why                                                      |
+| --------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| Building new multi-tenant SaaS          | Pool model with RLS + tenant_id in all queries        | Most cost-efficient at scale; RLS provides safety net    |
+| High-compliance tenant (HIPAA, finance) | Silo model (dedicated DB/infra per tenant)            | Regulatory requirements often mandate physical isolation |
+| Scaling from single to multi-tenant     | Bridge model (new tenants pooled, legacy siloed)      | Gradual migration; don't force big-bang refactor         |
+| Caching tenant data (Redis, CDN)        | Prefix all keys with `tenant_{id}:` pattern           | Prevents cache poisoning across tenants                  |
+| Resolving tenant context                | Derive from subdomain (`tenant.app.com`) or JWT claim | Never from request header/body; client can forge         |
+| Sequential resource IDs                 | Use UUIDs for all tenant-scoped resources             | Sequential IDs enable enumeration attacks                |
+| Shared application cache                | Separate cache instance per tenant OR namespaced keys | Cache invalidation bugs become cross-tenant attacks      |
+| Rate limiting API endpoints             | Per-tenant quotas, not global                         | Prevents noisy neighbor; ensures fairness                |
+| Multi-tenant analytics dashboard        | Tenant filter enforced at database view layer         | Application logic alone is insufficient                  |
+| Free tier + paid tier tenants           | Pool free (strict quotas), silo paid (dedicated)      | Cost optimization while meeting SLA needs                |
 
 ## Tenant Isolation Attack Patterns
 
 ### Attack #1: Cross-Tenant Data Leakage
 
 **How it happens:**
+
 - Missing `tenant_id` in WHERE clause
 - Bugs in ORM query builders
 - Direct SQL queries bypass application logic
 
 **Example vulnerable code:**
+
 ```typescript
 // ❌ VULNERABLE
 const getExams = (examId: string) => {
-  return db.query('SELECT * FROM exams WHERE id = ?', [examId]);
+  return db.query("SELECT * FROM exams WHERE id = ?", [examId]);
   // Missing tenant_id check!
-}
+};
 ```
 
 **Defense:**
+
 ```typescript
 // ✅ SECURE: Application layer
 const getExams = (examId: string, tenantId: string) => {
@@ -73,14 +76,16 @@ await db.query("SET app.tenant_id = $1", [tenantId]);
 ### Attack #2: Tenant Impersonation
 
 **How it happens:**
+
 - Trusting `tenantId` from request headers/cookies
 - Guessable tenant identifiers (sequential integers)
 - URL parameter manipulation
 
 **Defense:**
+
 ```typescript
 // ❌ NEVER trust client input
-const tenantId = req.headers['x-tenant-id']; // VULNERABLE
+const tenantId = req.headers["x-tenant-id"]; // VULNERABLE
 const tenantId = req.body.tenantId; // VULNERABLE
 
 // ✅ Derive from authenticated context
@@ -96,11 +101,13 @@ const tenantId = req.user.tenantId; // After auth middleware
 ### Attack #3: Shared Cache Poisoning
 
 **How it happens:**
+
 - Cache keys without tenant prefix
 - CDN caching across tenants
 - Application-level caching bugs
 
 **Defense:**
+
 ```typescript
 // ❌ VULNERABLE
 const cacheKey = `exam_${examId}`;
@@ -118,9 +125,11 @@ const data = await redis.get(cacheKey);
 ### Attack #4: Authentication System Isolation Failure
 
 **Critical insight from research:**
+
 > "Authentication is the entry point to everything else. While isolation bugs in application logic might expose data, in authentication, isolation bugs expose trust."
 
 **Defense:**
+
 - Establish tenant context BEFORE any data access
 - Validate tenant membership in auth middleware
 - Session tokens must include verified tenant claim
@@ -137,7 +146,7 @@ const authMiddleware = async (req, res, next) => {
 
   // 3. Verify user belongs to this tenant
   if (user.tenantId !== tenant.id) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   // 4. Set tenant context
@@ -150,36 +159,36 @@ const authMiddleware = async (req, res, next) => {
 
 ## Isolation Models: Silo vs Pool vs Bridge
 
-| Model | Architecture | Cost | Isolation | Use Case |
-| --- | --- | --- | --- | --- |
-| **Silo** | Dedicated DB/infra per tenant | High (linear scaling) | Complete (physical) | HIPAA, financial services, enterprise contracts |
-| **Pool** | Shared DB with logical separation (tenant_id) | Low (economies of scale) | Logical (app + RLS) | SaaS startups, SMB customers, free tiers |
-| **Bridge** | Mix: some tenants siloed, others pooled | Medium | Hybrid | Migrating single → multi-tenant; tiered SLAs |
+| Model      | Architecture                                  | Cost                     | Isolation           | Use Case                                        |
+| ---------- | --------------------------------------------- | ------------------------ | ------------------- | ----------------------------------------------- |
+| **Silo**   | Dedicated DB/infra per tenant                 | High (linear scaling)    | Complete (physical) | HIPAA, financial services, enterprise contracts |
+| **Pool**   | Shared DB with logical separation (tenant_id) | Low (economies of scale) | Logical (app + RLS) | SaaS startups, SMB customers, free tiers        |
+| **Bridge** | Mix: some tenants siloed, others pooled       | Medium                   | Hybrid              | Migrating single → multi-tenant; tiered SLAs    |
 
 **Decision criteria:**
 
-| Factor | Silo | Pool | Bridge |
-| --- | --- | --- | --- |
-| Compliance requirements (HIPAA, SOC2 Type II) | Required | Acceptable with strong controls | Silo for regulated tenants |
-| Cost sensitivity | Prohibitive at scale | Optimal | Balanced |
-| Customer size | Enterprise (willing to pay) | SMB / free tier | Mixed |
-| Performance isolation needs | Guaranteed | Shared (noisy neighbor risk) | Tiered SLAs |
-| Operational complexity | High (N databases to manage) | Low (single schema) | Medium |
+| Factor                                        | Silo                         | Pool                            | Bridge                     |
+| --------------------------------------------- | ---------------------------- | ------------------------------- | -------------------------- |
+| Compliance requirements (HIPAA, SOC2 Type II) | Required                     | Acceptable with strong controls | Silo for regulated tenants |
+| Cost sensitivity                              | Prohibitive at scale         | Optimal                         | Balanced                   |
+| Customer size                                 | Enterprise (willing to pay)  | SMB / free tier                 | Mixed                      |
+| Performance isolation needs                   | Guaranteed                   | Shared (noisy neighbor risk)    | Tiered SLAs                |
+| Operational complexity                        | High (N databases to manage) | Low (single schema)             | Medium                     |
 
 ## Common Mistakes
 
-| Mistake | Fix |
-| --- | --- |
-| Missing `tenant_id` in database queries | Code review checklist; ORM hooks to auto-inject; RLS as safety net |
-| Trusting client-supplied tenant identifier | Derive from authenticated session or subdomain; never from headers/body |
-| Shared cache keys without tenant namespace | Prefix all keys: `tenant_{id}:resource_{id}`; enforce via wrapper functions |
-| No Row-Level Security despite pooled model | Enable RLS on all tenant-scoped tables; set session context per request |
-| Sequential/guessable tenant or resource IDs | Use UUIDs; prevents enumeration attacks |
-| Tenant context set after data access begins | Auth middleware must set `tenant_id` BEFORE any queries |
-| Same rate limits for all tenants | Per-tenant quotas prevent noisy neighbor and ensure fairness |
-| No monitoring for cross-tenant access attempts | Log all authorization failures; alert on anomalous patterns |
-| Single failure in app logic exposes all tenants | Defense-in-depth: app logic + RLS + network isolation |
-| No tenant validation in background jobs | Workers must resolve and validate tenant context from job payload |
+| Mistake                                         | Fix                                                                         |
+| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| Missing `tenant_id` in database queries         | Code review checklist; ORM hooks to auto-inject; RLS as safety net          |
+| Trusting client-supplied tenant identifier      | Derive from authenticated session or subdomain; never from headers/body     |
+| Shared cache keys without tenant namespace      | Prefix all keys: `tenant_{id}:resource_{id}`; enforce via wrapper functions |
+| No Row-Level Security despite pooled model      | Enable RLS on all tenant-scoped tables; set session context per request     |
+| Sequential/guessable tenant or resource IDs     | Use UUIDs; prevents enumeration attacks                                     |
+| Tenant context set after data access begins     | Auth middleware must set `tenant_id` BEFORE any queries                     |
+| Same rate limits for all tenants                | Per-tenant quotas prevent noisy neighbor and ensure fairness                |
+| No monitoring for cross-tenant access attempts  | Log all authorization failures; alert on anomalous patterns                 |
+| Single failure in app logic exposes all tenants | Defense-in-depth: app logic + RLS + network isolation                       |
+| No tenant validation in background jobs         | Workers must resolve and validate tenant context from job payload           |
 
 ## Checklist
 
@@ -203,11 +212,13 @@ const authMiddleware = async (req, res, next) => {
 ### Row-Level Security (PostgreSQL)
 
 **Advantages:**
+
 - Enforced at database layer (survives app bugs)
 - Works with any query tool/ORM
 - Transparent to application code
 
 **Implementation:**
+
 ```sql
 -- Enable RLS
 ALTER TABLE exams ENABLE ROW LEVEL SECURITY;
@@ -221,6 +232,7 @@ SET app.tenant_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 ```
 
 **Tradeoff:**
+
 - Adds query planning overhead (~5-10%)
 - Requires session variable management
 - Doesn't replace application logic (use both)
@@ -228,11 +240,13 @@ SET app.tenant_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 ### Schema-Based Isolation (PostgreSQL)
 
 **Advantages:**
+
 - Complete separation (logical partitioning)
 - Easier to silo individual tenants later
 - Clearer audit boundaries
 
 **Implementation:**
+
 ```sql
 -- Create schema per tenant
 CREATE SCHEMA tenant_apollo;
@@ -247,6 +261,7 @@ SET search_path = tenant_apollo;
 ```
 
 **Tradeoff:**
+
 - Schema limit (PostgreSQL: ~250K schemas practical)
 - Cross-tenant analytics harder (UNION ALL across schemas)
 - Migration scripts must run per schema
@@ -254,11 +269,13 @@ SET search_path = tenant_apollo;
 ### Database-Per-Tenant (Silo)
 
 **When required:**
+
 - Compliance mandates (HIPAA, PCI-DSS)
 - Customer data residency (GDPR)
 - Performance isolation SLAs
 
 **Tradeoff:**
+
 - Connection pool per tenant (resource intensive)
 - Migration complexity (N databases to update)
 - Backup/restore overhead
@@ -282,6 +299,6 @@ SET search_path = tenant_apollo;
 
 ## Changelog
 
-| Date | Change |
-| --- | --- |
+| Date       | Change          |
+| ---------- | --------------- |
 | 2026-02-10 | Initial version |

@@ -13,6 +13,7 @@ export type {
   SearchResult,
   ListResult,
   BodhiConfig,
+  ResponseFormat,
 } from "./types.js";
 export {
   loadAllPlaybooks,

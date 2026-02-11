@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluation name="bodhi-mcp-v0.3" version="1.0">
+  <metadata>
+    <description>Multi-hop evaluation suite for Bodhi MCP knowledge base server. Tests agent's ability to combine multiple tools (route, search, list, read, summary, diagnose) to answer complex questions requiring synthesis across playbooks.</description>
+    <target_accuracy>0.80</target_accuracy>
+    <created>2026-02-11</created>
+    <total_questions>12</total_questions>
+  </metadata>
+  <qa_pairs>
+    <!-- CATEGORY 1: Route + Read (Easy) -->
+    <qa_pair id="1" difficulty="easy" category="route-read" tools_required="bodhi_route,bodhi_read">
+      <question>What is the Octalysis framework used for, and what is the key distinction between White Hat and Black Hat mechanics in gamification?</question>
+      <expected_answer>The Octalysis framework consists of 8 Core Drives to analyze game mechanics. White Hat drives (Epic Meaning, Accomplishment, Creativity) create long-term engagement by making users feel empowered, while Black Hat drives (Scarcity, Unpredictability, Loss Avoidance) create short-term action through urgency and obsession but lead to long-term churn.</expected_answer>
+      <reasoning>Agent must first route the task "explain Octalysis framework and white hat vs black hat mechanics" to the gamification playbook, then read that playbook and extract the specific section explaining the framework and the distinction. This is multi-hop because routing + reading are sequential steps.</reasoning>
+      <knowledge_path>ux/gamification.md</knowledge_path>
+      <sections>["Core Framework: Octalysis (8 Core Drives)", "Best Practices"]</sections>
+    </qa_pair>
+
+    <qa_pair id="2" difficulty="easy" category="route-read" tools_required="bodhi_route,bodhi_read">
+      <question>According to the payment integration guide, what is the recommended approach for handling network timeouts during payment processing, and why is idempotency important?</question>
+      <expected_answer>An idempotency key (UUID) should be attached to every payment API call. The gateway deduplicates by this key and returns the original result on retry without double-charging. This is critical because network retries and user double-clicks can otherwise cause duplicate charges.</expected_answer>
+      <reasoning>Agent must route the question to payment-integration playbook, then read the Decision Guide section that specifically addresses "Network timeout during payment" scenario. The multi-hop occurs because the question requires both routing to the right domain and then extracting the specific decision framework entry.</reasoning>
+      <knowledge_path>backend/payment-integration.md</knowledge_path>
+      <sections>["Decision Guide", "Idempotency &amp; Webhook Patterns"]</sections>
+    </qa_pair>
+
+    <!-- CATEGORY 2: Search + Cross-reference (Medium) -->
+    <qa_pair id="3" difficulty="medium" category="search-cross-reference" tools_required="bodhi_search,bodhi_read">
+      <question>Find the playbooks related to checkout design and payment integration. How do checkout UX patterns in India (from the UX domain) relate to or complement payment gateway selection strategies?</question>
+      <expected_answer>Search should find ux/india-checkout-patterns.md and backend/payment-integration.md. The connection is that checkout UX patterns define the user experience flow (form layout, payment method options, trust signals), while payment gateway selection determines the backend integration options, MDR rates, and settlement speed. Together they determine the complete checkout experience: UX patterns define what methods to show users, and gateway selection determines which methods are actually available and at what cost.</expected_answer>
+      <reasoning>This requires two sequential searches (one for checkout patterns, one for payment integration), then reading both to understand how they complement each other. The agent must synthesize information across domains to establish the relationship, making it a true multi-hop task that tests cross-domain understanding.</reasoning>
+      <knowledge_path>ux/india-checkout-patterns.md,backend/payment-integration.md</knowledge_path>
+      <sections>["All sections in both playbooks for relationship inference"]</sections>
+    </qa_pair>
+
+    <qa_pair id="4" difficulty="medium" category="search-cross-reference" tools_required="bodhi_search,bodhi_read">
+      <question>Search for playbooks about data protection and privacy. Then find guidance on how compliance with data protection rules impacts the design of learning analytics features. What constraints does India's DPDP Act place on adaptive learning algorithms?</question>
+      <expected_answer>The relevant playbooks are security/india-dpdp.md and potentially ux/neurochemistry-engagement.md or frontend design guides. The DPDP Act distinguishes between educational diagnostics (allowed with documentation) and adaptive engagement algorithms (prohibited without explicit consent). Learning analytics for diagnostic/testing purposes can be documented, but algorithms designed to drive engagement or predict behavior require separate consent and are heavily restricted for users under 18, requiring parental consent.</expected_answer>
+      <reasoning>Agent must search for privacy/compliance playbooks, then search for learning/analytics related content, then cross-reference to understand the constraints. This tests the ability to find implicit connections between a regulatory playbook and feature design playbooks, requiring multiple search queries and reading across contexts.</reasoning>
+      <knowledge_path>security/india-dpdp.md,ux/neurochemistry-engagement.md</knowledge_path>
+      <sections>["Learning analytics section in DPDP", "All sections in neurochemistry engagement"]</sections>
+    </qa_pair>
+
+    <!-- CATEGORY 3: List + Filter + Read (Medium) -->
+    <qa_pair id="5" difficulty="medium" category="list-filter-read" tools_required="bodhi_list,bodhi_read">
+      <question>List all playbooks in the UX domain with intermediate or advanced complexity. Among them, which ones specifically address engagement and motivation mechanics?</question>
+      <expected_answer>Intermediate+advanced UX playbooks include: gamification (intermediate), conversion (intermediate/advanced), design-system playbooks, etc. Among those, gamification.md, neurochemistry-engagement.md, and ethical-persuasion.md directly address engagement and motivation mechanics. Gamification focuses on game mechanics and intrinsic motivation, neurochemistry-engagement explores reward systems, and ethical-persuasion addresses ethical engagement strategies.</expected_answer>
+      <reasoning>Agent must first list playbooks by domain and filter by complexity, then examine multiple playbooks to identify which ones focus on engagement/motivation. This requires filtering on multiple dimensions (domain, complexity) and then reading multiple sources to identify thematic patterns, making it a true multi-step filtering and analysis task.</reasoning>
+      <knowledge_path>ux/* (filtered by complexity)</knowledge_path>
+      <sections>["Domain listings and individual playbook summaries"]</sections>
+    </qa_pair>
+
+    <qa_pair id="6" difficulty="medium" category="list-filter-read" tools_required="bodhi_list,bodhi_read">
+      <question>List all backend playbooks, then identify which ones address payment or financial flows. What are the key differences in their recommendations for different business models?</question>
+      <expected_answer>Backend playbooks addressing payment/financial flows include: payment-integration.md, cashfree-integration.md, b2b2c-payment-architecture.md, and possibly startup-financial-metrics.md and serverless-cost-modeling.md. Key differences: payment-integration focuses on gateway selection and transaction-level decisions, cashfree-integration is specific implementation guidance, b2b2c-payment-architecture addresses marketplace payment flows, while financial-metrics and cost-modeling address business viability from different angles (metrics vs infrastructure costs).</expected_answer>
+      <reasoning>Agent must list backend domain playbooks, filter those related to payments/financials, then read each to understand their scope and recommendations. The final step requires comparing recommendations across multiple playbooks to identify patterns by business model, requiring synthesis of information from multiple sources.</reasoning>
+      <knowledge_path>backend/* (filtered by payment/financial themes)</knowledge_path>
+      <sections>["Payment-related sections across multiple backend playbooks"]</sections>
+    </qa_pair>
+
+    <!-- CATEGORY 4: Multi-domain Synthesis (Hard) -->
+    <qa_pair id="7" difficulty="hard" category="multi-domain-synthesis" tools_required="bodhi_route,bodhi_search,bodhi_read">
+      <question>You're designing a premium checkout flow for a new EdTech product launch. Synthesize guidance from UX checkout design, payment gateway selection, India compliance regulations, and pitch deck investor psychology. What are the three most critical design decisions you must make, and why?</question>
+      <expected_answer>Critical decisions: (1) Payment method selection: Must support UPI (0% MDR), local cards (cheaper than international), and balance user preference with fee optimization (affects unit economics shown in pitch deck); (2) Trust/friction balance: DPDP Act requires explicit consent for data collection, checkout must disclose data usage, but too many consent screens harm conversion (affects metrics in pitch); (3) Age gate strategy: If targeting students under 18, parental consent adds friction but is legally required by DPDP Act, and investors (pitch deck) will ask about your compliance strategy. Premium position requires high-assurance UX (gamification, progressive disclosure) while maintaining legal compliance.</expected_answer>
+      <reasoning>This is a hard multi-hop task because it requires agent to: (1) Route across 4+ domains (ux/checkout, backend/payment, security/compliance, marketing/pitch), (2) Search for specific guidance in each domain, (3) Read and synthesize conflicting constraints (friction vs conversion, compliance vs user experience, costs vs investor narrative), (4) Synthesize into actionable decisions that balance all constraints. Tests true integration across knowledge silos.</reasoning>
+      <knowledge_path>ux/india-checkout-patterns.md,ux/premium-checkout-design.md,backend/payment-integration.md,security/india-dpdp.md,marketing/pitch-deck-strategy.md</knowledge_path>
+      <sections>["Multiple sections from each playbook"]</sections>
+    </qa_pair>
+
+    <qa_pair id="8" difficulty="hard" category="multi-domain-synthesis" tools_required="bodhi_route,bodhi_search,bodhi_list,bodhi_read">
+      <question>Design a go-to-market strategy for a new B2B SaaS product targeting Indian enterprises. You need to decide on pricing, sales approach, brand positioning, and product positioning. Which playbooks across marketing, backend, and architecture domains are most relevant, and how would you synthesize them into a coherent GTM plan?</question>
+      <expected_answer>Relevant playbooks: marketing/gtm-strategy.md (overall framework), marketing/gtm-pricing-packaging.md (pricing decisions), marketing/b2b-sales-lifecycle.md (sales process), marketing/company-brand-identity.md (positioning), marketing/b2b-sales-tools.md (tool stack). Backend: startup-financial-metrics.md (unit economics), payment-integration.md (B2B payment handling with Level 2/3 processing). Architecture: decisions.md (platform decisions affecting GTM). Synthesis: (1) Start with GTM-strategy framework, (2) Use gtm-pricing to set pricing model, (3) Use b2b-sales-lifecycle to define sales stages and required positioning, (4) Use financial-metrics to validate unit economics, (5) Use company-brand-identity to anchor positioning, (6) Use payment-integration to confirm you can handle B2B payment methods (multi-currency, net terms, invoicing).</expected_answer>
+      <reasoning>This hard task requires: (1) Routing across multiple domains (marketing has 5+ relevant playbooks, backend has 2-3, architecture has 1+), (2) Searching to find the right playbooks by theme, (3) Listing playbooks to discover relevant ones the agent might not initially think of, (4) Reading multiple playbooks to extract decision frameworks, (5) Synthesizing information across domains where decisions in one area (pricing from GTM-pricing) impact another area (unit economics from financial-metrics). Tests multi-domain understanding and ability to construct a coherent cross-domain narrative.</reasoning>
+      <knowledge_path>marketing/gtm-strategy.md,marketing/gtm-pricing-packaging.md,marketing/b2b-sales-lifecycle.md,marketing/company-brand-identity.md,backend/startup-financial-metrics.md,backend/payment-integration.md,architecture/decisions.md</knowledge_path>
+      <sections>["Decision guides across all playbooks"]</sections>
+    </qa_pair>
+
+    <!-- CATEGORY 5: Discovery Workflow (Hard) -->
+    <qa_pair id="9" difficulty="hard" category="discovery-workflow" tools_required="bodhi_summary,bodhi_list,bodhi_search,bodhi_read">
+      <question>Using the knowledge base summary, identify which domain has the most content. List playbooks in that domain, search for playbooks specifically about consumer engagement, and synthesize a strategy for driving user retention in an EdTech product. What are the key levers you can pull?</question>
+      <expected_answer>Summary will show UX domain has the most content. Listing UX domain yields 20+ playbooks. Searching for "engagement" or "retention" returns: gamification.md, neurochemistry-engagement.md, gen-z-loyalty.md, student-feedback-psychology.md, micro-interactions.md, loading-states.md, design-system-motion.md. Key retention levers: (1) Gamification (white hat mechanics for long-term engagement), (2) Neurochemistry of reward systems (understanding dopamine/cortisol timing), (3) Gen-Z loyalty drivers (authenticity, autonomy, community), (4) Feedback psychology (mastery feedback is more powerful than generic praise), (5) Micro-interactions (small moment delight), (6) Loading states (reduce perceived friction). Synthesis: Layer these from macro (gamification framework) to micro (micro-interactions), targeting Gen-Z values.</expected_answer>
+      <reasoning>This hard task requires a discovery workflow: (1) Call summary() to understand knowledge base distribution, (2) Use findings to guide list() call by domain, (3) Search() across returned domain for specific themes, (4) Read() multiple playbooks to extract strategies, (5) Synthesize into a coherent framework. Tests agent's ability to explore the knowledge base using tools in sequence, adjusting search strategy based on findings.</reasoning>
+      <knowledge_path>ux/* (multiple playbooks identified through discovery)</knowledge_path>
+      <sections>["All sections in engagement/retention-focused playbooks"]</sections>
+    </qa_pair>
+
+    <qa_pair id="10" difficulty="hard" category="discovery-workflow" tools_required="bodhi_summary,bodhi_diagnose,bodhi_search,bodhi_read">
+      <question>Run a health check on the knowledge base. Based on the diagnosis, identify any gaps or areas needing attention. Then search for playbooks about security and compliance. For an EdTech platform handling student data in India, what compliance and security controls are most critical?</question>
+      <expected_answer>Diagnose will return health status, possibly highlighting gaps (e.g., missing content on specific security patterns or compliance areas). Search returns: india-dpdp.md, india-saas-legal.md, children-data-protection.md, dev-prod-separation.md, multi-tenant-isolation.md, webapp-security.md, serverless-aws-security.md. Critical controls for EdTech with student data in India: (1) DPDP compliance (consent, parental consent for under-18, breach notification, retention limits), (2) Children data protection (higher standard for minors), (3) Data residency within India, (4) Multi-tenant isolation (separate tenant data), (5) Dev/prod separation (no test data in production), (6) Regular security audits. Synthesis: DPDP is foundational regulatory requirement; children-protection is specific to student data; multi-tenant isolation prevents cross-student data leakage; dev-prod separation prevents accidental exposure; webapp/serverless security hardens against common attacks.</expected_answer>
+      <reasoning>This hard task tests: (1) Ability to use diagnose() to understand knowledge base state, (2) Adjusting search strategy based on diagnosis results, (3) Searching across security/compliance domains to find relevant playbooks, (4) Reading multiple compliance/security playbooks to understand layered requirements, (5) Synthesizing into a cohesive control framework specific to a domain (EdTech) and jurisdiction (India). Tests both technical exploration and domain synthesis.</reasoning>
+      <knowledge_path>security/india-dpdp.md,security/india-saas-legal.md,security/children-data-protection.md,security/multi-tenant-isolation.md,security/dev-prod-separation.md</knowledge_path>
+      <sections>["All sections from compliance and security playbooks"]</sections>
+    </qa_pair>
+
+    <!-- CATEGORY 6: Disambiguation (Hard) -->
+    <qa_pair id="11" difficulty="hard" category="disambiguation" tools_required="bodhi_search,bodhi_read">
+      <question>Search for playbooks about "conversion" in the knowledge base. You'll likely find multiple results (UX/conversion, marketing/content-led-acquisition, marketing/gtm-strategy). Compare these playbooks to understand their different perspectives on driving conversions. When would you reference each one?</question>
+      <expected_answer>Three distinct conversion angles: (1) ux/conversion.md focuses on micro-level conversion mechanics (form optimization, funnel psychology, micro-interactions, persuasion patterns at the page/component level), (2) marketing/content-led-acquisition.md focuses on top-of-funnel content strategy that drives awareness and inbound traffic (which then needs the UX conversion optimizations), (3) marketing/gtm-strategy.md focuses on macro-level GTM narrative and messaging that positions the product value proposition (which informs both content strategy and UX copy). When to use each: (a) Designing a checkout flow? Use ux/conversion (form patterns, scarcity, social proof), (b) Building content strategy to drive inbound? Use content-led-acquisition, (c) Defining overall go-to-market narrative and positioning? Use gtm-strategy. All three work together: GTM strategy sets narrative → content-led-acquisition drives awareness → UX conversion optimizations convert the aware traffic.</expected_answer>
+      <reasoning>This hard disambiguation task requires: (1) Searching for a broad term ("conversion") that returns multiple results, (2) Reading multiple playbooks with similar-sounding titles, (3) Understanding their distinct scopes and perspectives, (4) Identifying when each is appropriate to reference. This tests the agent's ability to disambiguate between playbooks covering similar topics but from different levels of abstraction (macro strategy vs micro UX mechanics), which is a key challenge in navigating large knowledge bases.</reasoning>
+      <knowledge_path>ux/conversion.md,marketing/content-led-acquisition.md,marketing/gtm-strategy.md</knowledge_path>
+      <sections>["TL;DR and Decision Guide sections of all three playbooks"]</sections>
+    </qa_pair>
+
+    <qa_pair id="12" difficulty="hard" category="disambiguation" tools_required="bodhi_search,bodhi_route,bodhi_read">
+      <question>You're building a fraud detection system for payments. Search for security playbooks that might be relevant. You'll find multiple security patterns (webapp-security, serverless-aws-security, moving-target-defense, deception-detection). Which one(s) should guide your fraud detection architecture, and how do they differ in their approach to security threats?</question>
+      <expected_answer>Relevant security playbooks: (1) webapp-security.md addresses common web vulnerabilities (OWASP top 10, injection, XSS, CSRF) - important for protecting the API surface, (2) serverless-aws-security.md addresses AWS-specific security patterns (IAM, secrets management, Lambda permissions, API Gateway security) - important if building on AWS, (3) moving-target-defense.md addresses defense-in-depth through continuous change and polymorphism - relevant for making fraud detection itself a moving target, (4) deception-detection.md addresses detecting deceptive/fraudulent user behavior - most directly applicable to fraud detection logic. For fraud detection specifically: Start with deception-detection (behavioral patterns), combine with serverless-aws-security (if AWS-based implementation), and add moving-target-defense principles (make fraud patterns unpredictable by continuously updating detection rules). The distinction: webapp-security and serverless-aws-security address infrastructure security threats; deception-detection and moving-target-defense address application-level fraud/deception.</expected_answer>
+      <reasoning>This hard disambiguation task requires: (1) Searching broadly for "security" or "fraud" to discover multiple candidates, (2) Understanding that some candidates (webapp-security, serverless-aws-security) are infrastructure-focused while others (deception-detection, moving-target-defense) are application-logic-focused, (3) Routing conceptually to understand which are relevant for fraud detection specifically, (4) Reading multiple playbooks to understand their distinct approaches, (5) Synthesizing into a layered security strategy that combines multiple perspectives. Tests ability to navigate overlapping playbooks and understand when each applies based on problem decomposition (infrastructure vs application logic).</reasoning>
+      <knowledge_path>security/deception-detection.md,security/moving-target-defense.md,security/webapp-security.md,security/serverless-aws-security.md</knowledge_path>
+      <sections>["Decision guides and core concepts from all four playbooks"]</sections>
+    </qa_pair>
+  </qa_pairs>
+
+  <evaluation_guide>
+    <instructions>
+      <instruction>Each QA pair tests multi-hop reasoning by requiring the agent to use 2+ tools in sequence or combination.</instruction>
+      <instruction>Tool sequence indicates the recommended approach but agent may find alternative valid paths (e.g., using search instead of route).</instruction>
+      <instruction>Expected answers describe the synthesized knowledge; agent should demonstrate understanding of connections between concepts.</instruction>
+      <instruction>Scoring: Award full points only if agent uses required tools AND synthesizes correct understanding. Partial credit if agent finds correct playbooks but misses synthesis.</instruction>
+      <instruction>Difficulty progression: Easy (2-3 tools, 1 playbook), Medium (2-3 tools, 2+ playbooks), Hard (3+ tools, 2+ domains, synthesis required).</instruction>
+    </instructions>
+    <categories>
+      <category name="route-read" description="Find correct playbook via routing, extract specific content via reading">2</category>
+      <category name="search-cross-reference" description="Search multiple topics, read both, identify connections across domains">2</category>
+      <category name="list-filter-read" description="List by domain/complexity, filter results, read multiple to identify patterns">2</category>
+      <category name="multi-domain-synthesis" description="Route/search across 3+ domains, synthesize conflicting requirements into decisions">2</category>
+      <category name="discovery-workflow" description="Use summary/diagnose to guide exploration, then search/read/synthesize">2</category>
+      <category name="disambiguation" description="Search similar topics, read multiple playbooks, explain distinct scopes and applicability">2</category>
+    </categories>
+  </evaluation_guide>
+</evaluation>

@@ -1,5 +1,5 @@
 /**
- * Diagnose tool - Health check and debugging information
+ * bodhi_diagnose tool - Health check and debugging information
  */
 
 import * as fs from "fs";

@@ -36,7 +36,7 @@ Examples:
 `);
     process.exit(0);
   } else if (args[i] === "--version" || args[i] === "-v") {
-    console.log("bodhi-mcp v0.1.0");
+    console.log("bodhi-mcp v0.3.0");
     process.exit(0);
   }
 }

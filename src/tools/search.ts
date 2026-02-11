@@ -1,5 +1,5 @@
 /**
- * search(query, domain?) tool - Full-text search across playbooks
+ * bodhi_search(query, domain?) tool - Full-text search across playbooks
  */
 
 import type MiniSearch from "minisearch";
@@ -58,6 +58,10 @@ export function searchPlaybooks(
       score: Math.round(r.score * 100) / 100,
       tldr: r.tldr as string | undefined,
       matchedTerms: r.terms,
+      confidence: r.confidence as number | undefined,
+      status: r.status as string | undefined,
+      lastUpdated: r.lastUpdated as string | undefined,
+      stale: r.stale as boolean | undefined,
     }));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown search error";

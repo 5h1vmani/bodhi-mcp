@@ -1,5 +1,5 @@
 /**
- * route(task) tool - Find the best playbook for a given task
+ * bodhi_route(task) tool - Find the best playbook for a given task
  */
 
 import type { RouteResult, Playbook } from "../types.js";
@@ -27,7 +27,7 @@ export function routeTask(
 
   if (matches.length === 0) {
     return {
-      error: `No matching playbook found for task: "${task}". Try using search() for broader results.`,
+      error: `No matching playbook found for task: "${task}". Try using bodhi_search() for broader results.`,
     };
   }
 

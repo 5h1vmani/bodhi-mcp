@@ -4,6 +4,13 @@ topic: [topic-slug]
 tags: [tag1, tag2, tag3]
 complexity: [beginner|intermediate|advanced]
 last_updated: YYYY-MM-DD
+# Optional provenance fields — include for high-stakes domains (security, backend)
+confidence: [0.0-1.0]
+source_refs: []
+status: draft
+review_by: YYYY-MM-DD
+author: [who-produced-this]
+version: 1
 ---
 
 # [Topic Title]
