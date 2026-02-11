@@ -216,18 +216,18 @@ function buildErrorResponse(message: string) {
 // ─── Markdown Formatters ────────────────────────────────────────────────────
 
 function routeResultToMarkdown(result: Record<string, unknown>): string {
-  if ("error" in result) return `**Error:** ${result.error}`;
+  if ("error" in result) return `**Error:** ${String(result.error)}`;
   const lines = [
-    `## 🎯 ${result.title}`,
-    `**Path:** \`${result.playbook}\``,
-    `**Domain:** ${result.domain} | **Confidence:** ${result.confidence}`,
+    `## 🎯 ${String(result.title)}`,
+    `**Path:** \`${String(result.playbook)}\``,
+    `**Domain:** ${String(result.domain)} | **Confidence:** ${String(result.confidence)}`,
   ];
-  if (result.tldr) lines.push(`\n> ${result.tldr}`);
+  if (result.tldr) lines.push(`\n> ${String(result.tldr)}`);
   const alts = result.alternatives as Array<Record<string, unknown>> | undefined;
   if (alts && alts.length > 0) {
     lines.push("\n### Alternatives");
     for (const alt of alts) {
-      lines.push(`- \`${alt.playbook}\` (${alt.confidence}) — ${alt.title}`);
+      lines.push(`- \`${String(alt.playbook)}\` (${String(alt.confidence)}) — ${String(alt.title)}`);
     }
   }
   return lines.join("\n");
@@ -235,27 +235,27 @@ function routeResultToMarkdown(result: Record<string, unknown>): string {
 
 function searchResultsToMarkdown(results: Array<Record<string, unknown>>): string {
   if (results.length === 0) return "No results found.";
-  const lines = [`## Search Results (${results.length})\n`];
+  const lines = [`## Search Results (${String(results.length)})\n`];
   for (const r of results) {
-    let line = `- **${r.title}** (score: ${r.score}) — \`${r.path}\``;
+    let line = `- **${String(r.title)}** (score: ${String(r.score)}) — \`${String(r.path)}\``;
     if (r.stale) line += " ⚠️ stale";
-    if (r.status && r.status !== "validated") line += ` [${r.status}]`;
+    if (r.status && r.status !== "validated") line += ` [${String(r.status)}]`;
     lines.push(line);
-    if (r.tldr) lines.push(`  > ${r.tldr}`);
+    if (r.tldr) lines.push(`  > ${String(r.tldr)}`);
   }
   return lines.join("\n");
 }
 
 function listResultsToMarkdown(results: Array<Record<string, unknown>>): string {
   if (results.length === 0) return "No playbooks found.";
-  const lines = [`## Playbooks (${results.length})\n`];
+  const lines = [`## Playbooks (${String(results.length)})\n`];
   let currentDomain = "";
   for (const r of results) {
     if (r.domain !== currentDomain) {
       currentDomain = r.domain as string;
       lines.push(`\n### ${currentDomain}`);
     }
-    let line = `- **${r.title}** (\`${r.complexity}\`) — \`${r.path}\``;
+    let line = `- **${String(r.title)}** (\`${String(r.complexity)}\`) — \`${String(r.path)}\``;
     if (r.stale) line += " ⚠️ stale";
     lines.push(line);
   }
@@ -265,7 +265,7 @@ function listResultsToMarkdown(results: Array<Record<string, unknown>>): string 
 function summaryToMarkdown(result: Record<string, unknown>): string {
   const lines = [
     `## Knowledge Base Summary`,
-    `**Total playbooks:** ${result.totalPlaybooks}\n`,
+    `**Total playbooks:** ${String(result.totalPlaybooks)}\n`,
     `### Domains`,
   ];
   const domains = result.domains as Record<string, number>;
@@ -284,8 +284,8 @@ function diagnoseToMarkdown(result: Record<string, unknown>): string {
   const statusEmoji = result.status === "healthy" ? "✅" : result.status === "degraded" ? "⚠️" : "❌";
   const lines = [
     `## ${statusEmoji} Bodhi Diagnostics`,
-    `**Status:** ${result.status} | **Version:** ${result.version}`,
-    `**Playbooks:** ${result.playbooksCount} | **Routes:** ${result.routesCount} | **Search index:** ${result.searchIndexSize}`,
+    `**Status:** ${String(result.status)} | **Version:** ${String(result.version)}`,
+    `**Playbooks:** ${String(result.playbooksCount)} | **Routes:** ${String(result.routesCount)} | **Search index:** ${String(result.searchIndexSize)}`,
   ];
   const issues = result.issues as string[];
   if (issues && issues.length > 0) {
