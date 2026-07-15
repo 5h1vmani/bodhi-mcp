@@ -28,6 +28,31 @@ This domain covers marketing best practices: how to write compelling copy, build
 | `gtm-strategy.md`            | GTM motion selection (PLG/sales-led/hybrid), ICP, positioning, GTM by stage, efficiency metrics | Advanced     |
 | `gtm-pricing-packaging.md`   | Pricing models, tier architecture, free tier decisions, value metrics, pricing psychology       | Intermediate |
 | `gtm-expansion.md`           | Market entry, upmarket/downmarket, international, cloud marketplace, channel partnerships       | Intermediate |
+| `account-based-marketing.md` | ABM tier selection by ACV, tech stack sequencing, sales-marketing alignment                      | Advanced     |
+| `ai-citation-content-structure.md` | Passage-level content structure for LLM answer-engine extraction                           | Intermediate |
+| `ai-citation-measurement.md` | Tracking AI Overview presence, LLM citations, brand mentions on a small-team budget              | Intermediate |
+| `b2b-collateral-design.md`   | Visual design for brochures/one-pagers/datasheets by funnel stage                                | Intermediate |
+| `b2b-community-building.md`  | When/how to build B2B communities (CLG) that shorten sales cycles                                | Intermediate |
+| `b2b-website-architecture.md` | Structuring one site to convert clients, attract investors, build talent pipeline               | Advanced     |
+| `brand-production-pipeline.md` | Turning brand strategy into production assets; AI vs human craft split                         | Intermediate |
+| `cold-email-operations.md`   | Cold email infrastructure: domain/inbox setup, sending limits, warm-up                           | Intermediate |
+| `cold-outreach-cadence.md`   | Multi-channel outbound cadence: channel mix, touch count, timing                                 | Intermediate |
+| `d2c-community-building.md`  | Platform-specific D2C community strategy for retention and CAC reduction                         | Intermediate |
+| `demand-gen-orchestration.md` | Orchestration layer connecting inbound, outbound, community, ABM, events                        | Advanced     |
+| `devtool-website-anatomy.md` | Section-by-section blueprint for developer tool websites                                         | Advanced     |
+| `entity-authority-knowledge-graph.md` | Becoming a recognized entity to Google/Bing/LLMs: Wikidata, brand mentions              | Advanced     |
+| `india-pricing-strategy.md`  | PPP-adjusted India SaaS pricing: INR-denominated tiers, buyer psychology                         | Intermediate |
+| `india-telecalling-compliance.md` | Passing India's 5-layer spam call detection (TRAI, carrier AI, Truecaller)                 | Intermediate |
+| `interactive-demo-strategy.md` | Building interactive product demos that convert: step count, gating point                      | Intermediate |
+| `linkedin-company-page-strategy.md` | Company page setup, distribution, employee-advocacy model                                | Intermediate |
+| `medium-format-psychology.md` | When to use physical, digital, or hybrid formats for marketing/sales materials                  | Intermediate |
+| `product-marketing.md`       | PMM operating model: hiring timing, launch tiers, battle cards, feedback loop                    | Advanced     |
+| `product-video-strategy.md`  | Interactive demo vs passive video by funnel stage for SaaS                                       | Intermediate |
+| `programmatic-video-generation.md` | Generating video from code (Remotion/Motion Canvas/Revideo)                               | Intermediate |
+| `seo-aio-discoverability.md` | Three-layer SEO to GEO to AAIO framework for AI-agent discoverability                            | Intermediate |
+| `talent-pipeline-careers.md` | Selective careers page strategy: scarcity signaling, talent communities                          | Intermediate |
+| `video-ad-creative.md`       | Production style, platform targeting, sequencing decisions for video ads                         | Intermediate |
+| `video-production-craft.md`  | Production craft for music tempo, cut pacing, and caption styling                                | Intermediate |
 
 ## Key Principles
 

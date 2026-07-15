@@ -34,6 +34,14 @@ This domain covers understanding users, designing for their needs, and implement
 | `design-system-testing.md`         | Testing pyramid, visual regression tools, a11y automation gaps, DS metrics        | Advanced     |
 | `multi-platform-design-systems.md` | Cross-platform tokens, multi-brand architecture, white-label patterns             | Advanced     |
 | `design-system-motion.md`          | Spring vs duration animation, Apple/M3/Fluent motion, View Transitions API        | Advanced     |
+| `accessibility-build-rules.md`     | WCAG 2.2 AA success criteria requiring code changes: touch targets, focus, drag  | Intermediate |
+| `card-system.md`                   | Composable card primitive: named slots, tokens, cross-platform consistency        | Intermediate |
+| `devtool-dark-mode.md`             | Dark mode architecture for dev tools: off-black bases, elevation, desaturation    | Advanced     |
+| `devtool-premium-perception.md`    | What makes developer tools feel premium: restraint, keyboard-first, trust        | Advanced     |
+| `exam-mobile-interface.md`         | Connectivity resilience, question nav, server-side timer for mobile exam apps    | Advanced     |
+| `sub-perceptual-craft.md`          | Platform CSS defaults to kill (tap flash, font swap, scrollbar, theme flash)     | Intermediate |
+| `text-color-hierarchy.md`          | Four-level text color token ramp anchored to APCA Lc targets                     | Intermediate |
+| `visual-harmony-system.md`         | Measuring/gating conformance to a shared design order via value cardinality      | Advanced     |
 
 ## Key Principles
 

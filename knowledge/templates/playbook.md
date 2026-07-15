@@ -92,7 +92,7 @@ Delete any section you don't use. Target < 200 lines total.
 
 ## Related
 
-<!-- Other Nucleus playbooks. Delete if not needed. -->
+<!-- Other related playbooks. Delete if not needed. -->
 
 - [Related Playbook](./related.md) — How it connects
 

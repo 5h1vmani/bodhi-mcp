@@ -31,12 +31,12 @@ Environment Variables:
 
 Examples:
   bodhi-mcp
-  bodhi-mcp --knowledge-path /path/to/nucleus
-  BODHI_KNOWLEDGE_PATH=/path/to/nucleus bodhi-mcp
+  bodhi-mcp --knowledge-path /path/to/knowledge
+  BODHI_KNOWLEDGE_PATH=/path/to/knowledge bodhi-mcp
 `);
     process.exit(0);
   } else if (args[i] === "--version" || args[i] === "-v") {
-    console.log("bodhi-mcp v0.3.0");
+    console.log("bodhi-mcp v0.4.0");
     process.exit(0);
   }
 }

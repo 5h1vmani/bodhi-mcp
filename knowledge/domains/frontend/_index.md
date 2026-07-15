@@ -13,6 +13,7 @@ This domain covers everything that runs in the browser or native app: components
 | `server-components.md`      | Server vs Client Component boundary decisions   | Intermediate |
 | `nextjs-data-patterns.md`   | Caching, data fetching, revalidation in Next.js | Advanced     |
 | `ai-document-generation.md` | AI agent PDF/presentation generation pipelines  | Advanced     |
+| `design-to-code-fidelity.md` | Design-mock-to-code pipeline with machine-verified fidelity (tree-diff, pixel-diff) | Advanced |
 | `components.md`             | Building reusable UI components                 | Beginner     |
 | `state-management.md`       | Managing application state                      | Intermediate |
 | `performance.md`            | Bundle size, rendering, loading optimization    | Advanced     |

@@ -5,7 +5,7 @@ created: YYYY-MM-DD
 last_updated: YYYY-MM-DD
 owner: [team-or-person]
 status: [draft|active|deprecated]
-nucleus_refs:
+knowledge_refs:
   - domains/backend/payment-integration.md
   - domains/security/webapp-security.md
 ---
@@ -20,14 +20,14 @@ nucleus_refs:
 
 ## Standards Compliance
 
-<!-- Reference Nucleus playbooks this project follows -->
+<!-- Reference knowledge base playbooks this project follows -->
 
-This project follows these Nucleus playbooks:
+This project follows these knowledge base playbooks:
 
-| Domain   | Standard                                                                    | Compliance | Notes                      |
-| -------- | --------------------------------------------------------------------------- | ---------- | -------------------------- |
-| Backend  | [Payment Integration](../../nucleus/domains/backend/payment-integration.md) | Full       |                            |
-| Security | [Web App Security](../../nucleus/domains/security/webapp-security.md)       | Partial    | Using OAuth instead of JWT |
+| Domain   | Standard                                                             | Compliance | Notes                      |
+| -------- | --------------------------------------------------------------------- | ---------- | -------------------------- |
+| Backend  | [Payment Integration](../../domains/backend/payment-integration.md) | Full       |                            |
+| Security | [Web App Security](../../domains/security/webapp-security.md)       | Partial    | Using OAuth instead of JWT |
 
 ### Deviations from Standards
 

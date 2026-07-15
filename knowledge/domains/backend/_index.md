@@ -15,8 +15,9 @@ This domain covers everything that runs on the server: APIs, databases, backgrou
 | `b2b2c-payment-architecture.md` | White-label revenue splits, Razorpay Route, TCS/TDS, tenant payment isolation        |
 | `cashfree-integration.md`       | Cashfree PG API integration, webhooks, refunds, settlements, Easy Split, Token Vault |
 | `startup-financial-metrics.md`  | Which metrics to track/show by audience and stage; India compliance line items       |
-| `serverless-cost-modeling.md`   | Per-exam AWS cost modeling, service breakdown, scoring pipeline economics            |
 | `india-email-deliverability.md` | India-specific SES config, open tracking validity, DPDP compliance, Pinpoint EOL     |
+| `bring-your-own-payment-gateway.md` | Tenant-owned payment gateway without a PA licence: RBI carve-out, OAuth, PCI SAQ-A |
+| `ses-testing.md`                | Testing AWS SES without hurting sender reputation: Mailbox Simulator, mocks, sandbox limits |
 
 ## Key Principles
 

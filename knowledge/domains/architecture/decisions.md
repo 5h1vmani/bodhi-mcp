@@ -109,7 +109,7 @@ project/
 └── src/
 ```
 
-**Cross-cutting decisions** that affect multiple repos go in Nucleus or central documentation.
+**Cross-cutting decisions** that affect multiple repos go in a central knowledge base.
 
 ### Number and Title Conventions
 

@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-16
+
+### Added
+
+- Expanded knowledge base with new playbooks across ai-development, backend, data, devops, documentation, frontend, marketing, testing, and ux domains
+- Pre-publish content gate (`npm run check:leak`), wired into `prepublishOnly` so the published package is verified before release
+
+### Changed
+
+- Refreshed existing playbooks and rebuilt the routing index (`INDEX.md`) to cover the expanded doc set
+
+### Removed
+
+- Maintenance tooling and internal references not needed by the runtime server
+
+## [0.3.0] - 2026-02-11
+
+### Added
+
+- All tools namespaced with a `bodhi_` prefix for multi-server composition
+- `outputSchema` and `structuredContent` on every tool; tool annotations (`readOnlyHint`, `idempotentHint`)
+- `response_format` parameter (`json` | `markdown`) on read tools
+- MCP resources primitive and capability negotiation
+- Evaluation suite for multi-hop routing accuracy
+
+### Changed
+
+- Cache rewrite with TTL and filesystem mtime invalidation
+
+### Fixed
+
+- Path traversal prevention on the read tool
+
 ## [0.2.0] - 2026-02-10
 
 ### Added

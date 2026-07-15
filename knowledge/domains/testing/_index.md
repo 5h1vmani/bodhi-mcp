@@ -8,7 +8,9 @@ This domain covers how to test your code effectively: what to test, how to test 
 
 ## Files in This Domain
 
-No playbooks currently in this domain.
+| File                   | Description                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------- |
+| `testing-strategy.md` | Assessment-platform testing: scoring correctness, adaptive-engine simulation, item-promotion gates, exam-day load |
 
 ## Key Principles
 

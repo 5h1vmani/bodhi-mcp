@@ -54,7 +54,7 @@ Every tool must declare:
 
 | Element             | What                                            | Example                                                   |
 | ------------------- | ----------------------------------------------- | --------------------------------------------------------- |
-| **Service prefix**  | `{project}_` on all tool names                  | `bodhi_search`, `pinaka_route`                            |
+| **Service prefix**  | `{project}_` on all tool names                  | `bodhi_search`, `acme_route`                            |
 | **outputSchema**    | JSON Schema for structured output               | `{ results: [], total_results: int, has_more: bool }`     |
 | **Annotations**     | Behavioral hints for the host                   | `readOnlyHint: true, idempotentHint: true`                |
 | **response_format** | `"json" \| "markdown"` param (default markdown) | Markdown for LLM context; JSON for programmatic consumers |
@@ -150,7 +150,6 @@ For synthesized knowledge entries, track:
 ## Related
 
 - [agent-workflows.md](./agent-workflows.md) — Cost-optimized multi-agent patterns (Opus/Sonnet/Haiku delegation)
-- [meta/contributing.md](../../meta/contributing.md) — Nucleus contribution process
 
 ---
 

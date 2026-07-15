@@ -16,6 +16,7 @@ This domain covers getting code to production and keeping it running: pipelines,
 | `monitoring.md`             | Observability, alerting, dashboards                                                                  | Intermediate |
 | `deployment.md`             | Deployment strategies, rollbacks                                                                     | Intermediate |
 | `iac-best-practices.md`     | CDK/Terraform/Pulumi tool selection, construct patterns, multi-stack, testing, AI-agent-friendly IaC | Intermediate |
+| `logging-observability.md`  | Serverless logging/observability: correlation, PII-out-by-projection, DPDP audit trail               | Intermediate |
 
 ## Key Principles
 

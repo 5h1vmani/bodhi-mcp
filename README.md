@@ -54,7 +54,7 @@ npm install
 npm run build
 
 # Run with your knowledge base
-npm start -- --knowledge-path /path/to/nucleus
+npm start -- --knowledge-path /path/to/knowledge
 ```
 
 ## Available Tools
@@ -133,9 +133,9 @@ Use to troubleshoot setup issues or verify the knowledge base is loaded correctl
 ```
 Output: {
   "status": "healthy",
-  "version": "0.3.0",
-  "playbooksCount": 82,
-  "routesCount": 246,
+  "version": "0.4.0",
+  "playbooksCount": 112,
+  "routesCount": 339,
   "domainsFound": ["ux", "marketing", "security", ...],
   "issues": [],
   "recommendations": []
@@ -176,7 +176,7 @@ Bodhi organizes knowledge into domains:
 
 ## Creating Your Own Knowledge Base
 
-Bodhi works with any knowledge base following the Nucleus format:
+Bodhi works with any knowledge base following this structure:
 
 ```
 knowledge/

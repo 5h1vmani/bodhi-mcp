@@ -8,7 +8,9 @@ This domain covers working with data at scale: pipelines, storage, analytics, an
 
 ## Files in This Domain
 
-No playbooks currently in this domain. Contribute following `meta/contributing.md`.
+| File                                 | Description                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `multi-tenant-rls-schema-design.md` | Pooled multi-tenant Postgres schema with RLS: FORCE RLS, SET LOCAL tenant context, fail-closed policies, PII isolation |
 
 ## Key Principles
 

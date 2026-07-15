@@ -12,6 +12,7 @@ This domain covers documentation patterns: how to structure docs for humans and 
 | ----------------- | ---------------------------------------------- | ------------ |
 | `ai-optimized.md` | Writing docs AI agents can consume efficiently | Intermediate |
 | `api-docs.md`     | API reference documentation, OpenAPI specs     | Intermediate |
+| `docs-as-code-ai.md` | Docs-as-code for AI agents: AGENTS.md/llms.txt design, drift prevention | Intermediate |
 
 ## Key Principles
 

@@ -249,9 +249,6 @@ if (hasConsent("analytics")) {
 
 For ready-to-use templates with placeholder variables, see:
 
-- [Pinaka Legal Templates](../../../pinaka_landing/docs/legal/templates/)
-- [Template Usage Guide](../../../pinaka_landing/docs/legal/templates/README.md)
-
 Templates use `{{PLACEHOLDER}}` format for easy find-and-replace customization.
 
 ## Key Deadlines

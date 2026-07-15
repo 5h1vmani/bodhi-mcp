@@ -340,10 +340,6 @@ Subagents have independent context windows:
 - [Model Configuration](https://code.claude.com/docs/en/model-config) — Model selection docs
 - [Anthropic Pricing](https://platform.claude.com/docs/en/about-claude/pricing) — Current pricing
 
-## Related
-
-- [meta/contributing.md](../../meta/contributing.md) — Multi-agent research process
-
 ---
 
 ## Changelog

@@ -108,7 +108,7 @@ We will use **Option X** because:
 ## Related
 
 - [Related ADR](./adr-xxx.md)
-- [Nucleus Playbook](../../nucleus/domains/xxx/yyy.md)
+- [Related Playbook](../../domains/xxx/yyy.md)
 - [External Resource](URL)
 
 ## Notes

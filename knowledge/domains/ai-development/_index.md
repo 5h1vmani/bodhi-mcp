@@ -22,6 +22,9 @@
 | ---------------------- | ------------------------------------------------------------------------- |
 | `agent-workflows.md`   | Multi-agent patterns, model selection, cost control                       |
 | `mcp-server-design.md` | MCP server architecture, AI-first tool design, caching, provenance, evals |
+| `agent-web-data-acquisition.md` | Tiered web-scraping decision framework: HTTP vs headless browser vs AI-native tools, cost tiers |
+| `agentic-security-review.md` | Orchestrating agent fleets for vulnerability discovery: find, verify, prove exploitability |
+| `git-for-ai-agents.md` | Git workflow for AI agents: worktrees, WIP commits, attribution, guardrails, small PRs |
 
 ## Domain Scope
 

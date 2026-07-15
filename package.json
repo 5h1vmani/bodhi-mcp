@@ -1,6 +1,6 @@
 {
   "name": "bodhi-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Synthesized decision frameworks for AI agents. Enlightenment through curated knowledge.",
   "type": "module",
   "main": "dist/index.js",
@@ -23,7 +23,8 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test:run",
+    "check:leak": "bash scripts/check-no-leak.sh",
+    "prepublishOnly": "npm run build && npm run check:leak && npm run test:run",
     "prepare": "husky"
   },
   "keywords": [

@@ -250,11 +250,11 @@ SET app.tenant_id = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 ```sql
 -- Create schema per tenant
 CREATE SCHEMA tenant_apollo;
-CREATE SCHEMA tenant_mypinaka;
+CREATE SCHEMA tenant_acme;
 
 -- Tenant tables
 CREATE TABLE tenant_apollo.exams (...);
-CREATE TABLE tenant_mypinaka.exams (...);
+CREATE TABLE tenant_acme.exams (...);
 
 -- Set search path per request
 SET search_path = tenant_apollo;
